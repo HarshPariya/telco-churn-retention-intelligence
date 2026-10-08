@@ -1,0 +1,3 @@
+@echo off
+echo Starting Telco Churn Dashboard on http://localhost:8501...
+.\.venv\Scripts\python.exe -m streamlit run dashboard/app.py --server.port 8501
