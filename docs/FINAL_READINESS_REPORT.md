@@ -194,24 +194,24 @@ This audit serves as the final technical gateway evaluation required under Secti
 
 ### Category 8: Streamlit Business Dashboard
 
-* **Requirement 8.1:** Modern styling and responsive layout.  
+* **Requirement 8.1:** Enterprise light styling and responsive layout.  
   *Status:* **PASS**  
-  *Evidence:* Styled with custom CSS, dark palette (`#0f172a`, `#1e293b`), glassmorphic KPI cards, and Plotly interactive visualizations.
+  *Evidence:* Fully engineered with a professional corporate light design system (Page background `#F5F7FA`, white surfaces `#FFFFFF`, dark charcoal typography `#172033` / `#5B6577`, subtle borders `#E2E8F0`, and corporate blue accents `#2563EB`). Dark theme and theme toggles eliminated entirely. Enforced via `.streamlit/config.toml` (`base = "light"`).
 * **Requirement 8.2:** Executive Overview page.  
   *Status:* **PASS**  
-  *Evidence:* Real KPI cards (total customers 7,043, churn rate 26.54%, at-risk CLV), risk tier distribution donut chart, churn drivers breakdown.
+  *Evidence:* Executive KPI cards (Total Customers 7,043, Churn Rate 26.54%, Flagged High Risk accounts, and At-Risk CLV), Churn by Contract, Churn by Tenure, Risk Tier Distribution, and illustrative scenario economics.
 * **Requirement 8.3:** Single Customer Prediction page.  
   *Status:* **PASS**  
-  *Evidence:* Interactive customer profile form, real-time prediction, risk gauge, CLV & Priority score, and dynamic SHAP waterfall chart.
+  *Evidence:* Structured 3-step diagnostic workflow (Customer Profile, Account & Billing, Services), clear risk banners (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`), CLV & Priority score, and top 3 actual SHAP drivers explained in plain business language.
 * **Requirement 8.4:** Retention Prioritization page.  
   *Status:* **PASS**  
-  *Evidence:* CSV upload, data validation, bulk batch inference, ranked retention table, filterable by risk tier, CSV export.
+  *Evidence:* Transparent methodology banner (`Priority = Churn Probability × CLV`), CSV uploader + 1-click sample cohort evaluation, summary KPIs, risk distribution breakdown, and filterable/exportable ranked call queue.
 * **Requirement 8.5:** Model Insights page.  
   *Status:* **PASS**  
-  *Evidence:* Model comparison table, ROC & PR curves, confusion matrix visualization, global SHAP importance plot, and business threshold explanation.
-* **Requirement 8.6:** Live browser integration verified.  
+  *Evidence:* Multi-model benchmark comparison leaderboard, holdout metrics (ROC-AUC 0.8439, PR-AUC 0.6582, Recall 93.85%, Precision 41.05%, F1 0.5712, Brier 0.1631), holdout confusion matrix, ROC & PR curves, global SHAP beeswarm & bar plots, and operational decision threshold governance rationale.
+* **Requirement 8.6:** Deterministic single-source routing and lifecycle verification.  
   *Status:* **PASS**  
-  *Evidence:* Dashboard runs cleanly on `localhost:8501`.
+  *Evidence:* Single entrypoint `dashboard/app.py` dispatching cleanly to `dashboard/views/` modules. Legacy multi-page folder removed to prevent duplicate routes or auto-discovery collisions. Verified via automated Streamlit `AppTest` lifecycle suite (`scripts/verify_dashboard_apptest.py`) with zero unhandled exceptions.
 
 ---
 

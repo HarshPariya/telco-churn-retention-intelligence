@@ -1,4 +1,4 @@
-"""Sidebar status and model health indicator component."""
+"""Sidebar status component with enterprise light styling."""
 
 import streamlit as st
 
@@ -6,9 +6,13 @@ from src.telco_churn.models.registry import load_production_artifact
 
 
 def render_sidebar_status() -> None:
-    """Render verified model status in sidebar."""
+    """Render compact, verified model status in sidebar."""
     st.markdown(
-        "<div style='font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;'>MODEL STATUS</div>",
+        """
+        <div style="font-size: 0.72rem; color: #5B6577; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+            MODEL STATUS
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
@@ -17,17 +21,21 @@ def render_sidebar_status() -> None:
         st.markdown(
             f"""
             <div style="
-                background: rgba(16, 185, 129, 0.1);
-                border: 1px solid rgba(16, 185, 129, 0.35);
-                border-radius: 8px;
-                padding: 12px 14px;
+                background: #FFFFFF;
+                border: 1px solid #E2E8F0;
+                border-radius: 6px;
+                padding: 10px 12px;
                 margin-bottom: 16px;
             ">
-                <div style="font-size: 0.78rem; color: #10b981; font-weight: 700;">● Model Ready</div>
-                <div style="font-size: 0.88rem; font-weight: 600; color: #f8fafc; margin-top: 4px;">{meta.model_name}</div>
-                <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 2px;">
-                    Version: <b>{meta.model_version}</b><br/>
-                    Threshold: <b>{meta.optimal_threshold:.2f}</b>
+                <div style="font-size: 0.80rem; color: #15803D; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background-color: #15803D;"></span>
+                    Healthy
+                </div>
+                <div style="font-size: 0.84rem; font-weight: 600; color: #172033; margin-top: 3px;">
+                    {meta.model_name}
+                </div>
+                <div style="font-size: 0.76rem; color: #5B6577; margin-top: 2px;">
+                    Version: <b>{meta.model_version}</b>
                 </div>
             </div>
             """,
@@ -37,14 +45,18 @@ def render_sidebar_status() -> None:
         st.markdown(
             """
             <div style="
-                background: rgba(245, 158, 11, 0.1);
-                border: 1px solid rgba(245, 158, 11, 0.35);
-                border-radius: 8px;
-                padding: 12px 14px;
+                background: #FFFBEB;
+                border: 1px solid #FDE68A;
+                border-radius: 6px;
+                padding: 10px 12px;
                 margin-bottom: 16px;
             ">
-                <div style="font-size: 0.78rem; color: #f59e0b; font-weight: 700;">⚠️ Model Unavailable</div>
-                <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">Run `python scripts/train_model.py`</div>
+                <div style="font-size: 0.80rem; color: #B45309; font-weight: 700;">
+                    ⚠️ Unavailable
+                </div>
+                <div style="font-size: 0.76rem; color: #5B6577; margin-top: 3px;">
+                    Model artifact not initialized.
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -52,10 +64,12 @@ def render_sidebar_status() -> None:
 
     st.markdown(
         """
-        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">ABOUT</div>
-        <p style="font-size: 0.8rem; color: #64748b; line-height: 1.45; margin-bottom: 0;">
+        <div style="font-size: 0.72rem; color: #5B6577; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+            ABOUT
+        </div>
+        <div style="font-size: 0.78rem; color: #5B6577; line-height: 1.45;">
             Predict customer churn, understand the main risk drivers, and prioritize high-value customers for retention.
-        </p>
+        </div>
         """,
         unsafe_allow_html=True,
     )

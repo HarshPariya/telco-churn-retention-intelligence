@@ -1,8 +1,9 @@
-"""Customer Churn Prediction view with real-time SHAP explanation."""
+"""Customer Churn Prediction view: Individual customer assessment and explainability."""
 
 import streamlit as st
 
-from dashboard.components.risk_card import (
+from dashboard.components.cards import (
+    render_driver_card,
     render_metric_card,
     render_risk_badge,
 )
@@ -16,35 +17,37 @@ def render_customer_prediction() -> None:
     st.markdown(
         """
         <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 2.2rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">
+            <h1 style="font-size: 1.65rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
                 Customer Churn Prediction
             </h1>
-            <p style="color: #94a3b8; font-size: 1.05rem; margin-bottom: 12px;">
-                Enter the customer's current profile to estimate churn risk and understand the main factors influencing the prediction.
+            <p style="color: #5B6577; font-size: 0.95rem; margin-bottom: 14px;">
+                Estimate churn risk for an individual customer and understand the main factors behind the prediction.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # User Guidance Workflow
+    # Simple 3-Step Workflow Banner
     st.markdown(
         """
         <div style="
-            background: rgba(30, 41, 59, 0.6);
-            border-left: 4px solid #6366f1;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
             border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 24px;
-            font-size: 0.88rem;
-            color: #cbd5e1;
+            padding: 12px 18px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            color: #475569;
         ">
-            <b>Workflow Guide:</b>
-            <span style="margin-left: 8px;">1. Enter customer details</span> →
-            <span style="margin-left: 4px;">2. Click <b>"Predict Churn Risk"</b></span> →
-            <span style="margin-left: 4px;">3. Review risk & customer value</span> →
-            <span style="margin-left: 4px;">4. Inspect main risk drivers</span> →
-            <span style="margin-left: 4px;">5. Prioritize retention review</span>
+            <div><b>Step 1:</b> Enter customer details</div>
+            <div style="color: #CBD5E1;">→</div>
+            <div><b>Step 2:</b> Run prediction</div>
+            <div style="color: #CBD5E1;">→</div>
+            <div><b>Step 3:</b> Review risk and contributing factors</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -54,7 +57,7 @@ def render_customer_prediction() -> None:
         predictor = get_predictor()
     except Exception:
         st.error(
-            "The prediction model is currently unavailable. Please verify the model service or run `python scripts/train_model.py`."
+            "The prediction service is temporarily unavailable. Please verify that the model artifact is loaded."
         )
         return
 
@@ -62,56 +65,47 @@ def render_customer_prediction() -> None:
 
     with col_input:
         with st.form("customer_prediction_form"):
-            st.markdown("### 1. Customer Profile")
+            st.markdown(
+                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin-bottom: 8px;'>Customer Profile</div>",
+                unsafe_allow_html=True,
+            )
             customer_id = st.text_input(
-                "Customer Account ID",
+                "Customer ID",
                 value="CUST-7590-VH",
-                help="Unique identifier for the subscriber account.",
+                help="Account or customer reference identifier.",
             )
 
-            c1, c2 = st.columns(2)
-            with c1:
+            p1, p2 = st.columns(2)
+            with p1:
                 gender = st.selectbox("Gender", options=["Female", "Male"])
                 senior = st.selectbox(
-                    "Senior Citizen (Age ≥ 65)",
+                    "Senior Citizen",
                     options=[0, 1],
                     format_func=lambda x: "Yes" if x == 1 else "No",
-                    help="Indicates whether the customer is 65 years or older.",
                 )
-            with c2:
-                partner = st.selectbox(
-                    "Partner",
-                    options=["No", "Yes"],
-                    help="Indicates if the customer has a partner.",
-                )
-                dependents = st.selectbox(
-                    "Dependents",
-                    options=["No", "Yes"],
-                    help="Indicates if the customer lives with dependents.",
-                )
+            with p2:
+                partner = st.selectbox("Partner", options=["No", "Yes"])
+                dependents = st.selectbox("Dependents", options=["No", "Yes"])
 
-            st.markdown("### 2. Account & Billing")
+            st.markdown(
+                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin: 14px 0 8px 0;'>Account & Billing</div>",
+                unsafe_allow_html=True,
+            )
             a1, a2 = st.columns(2)
             with a1:
                 tenure = st.slider(
-                    "Customer Tenure (Months)",
+                    "Tenure (Months)",
                     min_value=0,
                     max_value=72,
                     value=4,
-                    help="Total number of months the customer has stayed with the company.",
+                    help="Number of months customer has been subscribed.",
                 )
                 contract = st.selectbox(
-                    "Contract Type",
+                    "Contract Term",
                     options=["Month-to-month", "One year", "Two year"],
                     index=0,
-                    help="Contract commitment term.",
                 )
-                paperless = st.selectbox(
-                    "Paperless Billing",
-                    options=["Yes", "No"],
-                    index=0,
-                    help="Whether paperless digital billing is enabled.",
-                )
+                paperless = st.selectbox("Paperless Billing", options=["Yes", "No"], index=0)
             with a2:
                 payment = st.selectbox(
                     "Payment Method",
@@ -122,7 +116,6 @@ def render_customer_prediction() -> None:
                         "Credit card (automatic)",
                     ],
                     index=0,
-                    help="Primary billing method used by the account.",
                 )
                 monthly = st.number_input(
                     "Monthly Charges ($)",
@@ -130,73 +123,42 @@ def render_customer_prediction() -> None:
                     max_value=130.0,
                     value=79.85,
                     step=1.0,
-                    help="Current monthly subscription cost.",
                 )
-                calc_total = round(monthly * max(tenure, 1), 2)
+                default_total = round(monthly * max(tenure, 1), 2)
                 total = st.number_input(
-                    "Total Charges ($)",
+                    "Total Charges to Date ($)",
                     min_value=0.0,
                     max_value=10000.0,
-                    value=calc_total,
+                    value=default_total,
                     step=10.0,
-                    help="Cumulative lifetime billing charges to date.",
                 )
 
-            st.markdown("### 3. Services")
+            st.markdown(
+                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin: 14px 0 8px 0;'>Subscribed Services</div>",
+                unsafe_allow_html=True,
+            )
             s1, s2, s3 = st.columns(3)
             with s1:
                 phone = st.selectbox("Phone Service", options=["Yes", "No"], index=0)
-                multiple = st.selectbox(
-                    "Multiple Lines",
-                    options=["No", "Yes", "No phone service"],
-                    index=0,
-                )
-                internet = st.selectbox(
-                    "Internet Service",
-                    options=["Fiber optic", "DSL", "No"],
-                    index=0,
-                )
-
+                multiple = st.selectbox("Multiple Lines", options=["No", "Yes", "No phone service"], index=0)
+                internet = st.selectbox("Internet Service", options=["Fiber optic", "DSL", "No"], index=0)
             with s2:
-                security = st.selectbox(
-                    "Online Security",
-                    options=["No", "Yes", "No internet service"],
-                    index=0,
-                )
-                backup = st.selectbox(
-                    "Online Backup",
-                    options=["No", "Yes", "No internet service"],
-                    index=0,
-                )
-                protection = st.selectbox(
-                    "Device Protection",
-                    options=["No", "Yes", "No internet service"],
-                    index=0,
-                )
-
+                security = st.selectbox("Online Security", options=["No", "Yes", "No internet service"], index=0)
+                backup = st.selectbox("Online Backup", options=["No", "Yes", "No internet service"], index=0)
+                protection = st.selectbox("Device Protection", options=["No", "Yes", "No internet service"], index=0)
             with s3:
-                support = st.selectbox(
-                    "Tech Support",
-                    options=["No", "Yes", "No internet service"],
-                    index=0,
-                )
-                tv = st.selectbox(
-                    "Streaming TV",
-                    options=["Yes", "No", "No internet service"],
-                    index=0,
-                )
-                movies = st.selectbox(
-                    "Streaming Movies",
-                    options=["Yes", "No", "No internet service"],
-                    index=0,
-                )
+                support = st.selectbox("Technical Support", options=["No", "Yes", "No internet service"], index=0)
+                tv = st.selectbox("Streaming TV", options=["Yes", "No", "No internet service"], index=0)
+                movies = st.selectbox("Streaming Movies", options=["Yes", "No", "No internet service"], index=0)
 
-            st.form_submit_button(
-                "⚡ Predict Churn Risk", width="stretch"
-            )
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            st.form_submit_button("Predict Churn Risk", width="stretch")
 
     with col_result:
-        st.markdown("### 🎯 Prediction & Diagnostic Output")
+        st.markdown(
+            "<div style='font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 8px;'>Model Assessment</div>",
+            unsafe_allow_html=True,
+        )
 
         req = CustomerPredictionRequest(
             customer_id=customer_id or "CUST-ANON",
@@ -222,90 +184,68 @@ def render_customer_prediction() -> None:
         )
 
         try:
-            with st.spinner("Calculating calibrated churn risk & SHAP attributions..."):
-                res = predictor.predict_single(req)
+            res = predictor.predict_single(req)
         except Exception:
-            st.error(
-                "Prediction failed. Please ensure all customer profile fields have valid values."
-            )
+            st.error("Unable to evaluate this customer profile. Please check the entered values.")
             return
 
-        # Render Risk Badge
+        # Risk Banner
         render_risk_badge(res.risk_level, res.churn_probability)
 
-        # Value & Priority Metrics
+        # Supporting Value Metrics
         m1, m2 = st.columns(2)
         with m1:
             render_metric_card(
-                title="Customer Lifetime Value",
+                title="Customer Value (CLV)",
                 value=f"${res.clv:,.2f}",
-                subtext=f"≈ ₹{res.clv_inr:,.0f} Historical Spend",
-                color_class="indigo",
+                subtext="Historical billing spend",
+                color_class="blue",
             )
         with m2:
             render_metric_card(
                 title="Retention Priority",
                 value=f"{res.retention_priority_score:,.1f}",
-                subtext=f"Expected Loss: ₹{res.retention_priority_inr:,.0f}",
+                subtext=f"Expected loss: ₹{res.retention_priority_inr:,.0f}",
                 color_class="rose" if res.risk_level in ["CRITICAL", "HIGH"] else "emerald",
             )
 
-        # Top 3 Drivers Section
-        st.markdown("#### Why is this customer at risk?")
-        st.caption("Top 3 influential drivers identified by the model:")
+        # Contributing Factors Section
+        st.markdown(
+            "<div style='font-size: 0.96rem; font-weight: 600; color: #172033; margin: 16px 0 4px 0;'>Why this prediction?</div>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<div style='font-size: 0.82rem; color: #5B6577; margin-bottom: 10px;'>Top factors influencing this customer's predicted risk:</div>",
+            unsafe_allow_html=True,
+        )
 
         for idx, driver in enumerate(res.top_drivers, start=1):
-            is_risk = driver.direction == "INCREASES_CHURN"
-            arrow = "🔺 Increases predicted churn risk" if is_risk else "🔻 Protects retention (reduces risk)"
-            color = "#f43f5e" if is_risk else "#10b981"
-            bg = "rgba(244, 63, 94, 0.08)" if is_risk else "rgba(16, 185, 129, 0.08)"
+            render_driver_card(driver.feature, driver.direction, driver.impact, idx)
 
-            st.markdown(
-                f"""
-                <div style="
-                    background: {bg};
-                    border-left: 4px solid {color};
-                    border-radius: 6px;
-                    padding: 10px 14px;
-                    margin-bottom: 8px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                ">
-                    <div>
-                        <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">DRIVER #{idx}</div>
-                        <div style="font-size: 0.95rem; font-weight: 600; color: #f8fafc;">{driver.feature}</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.8rem; font-weight: 600; color: {color};">{arrow}</div>
-                        <div style="font-size: 0.72rem; color: #94a3b8;">Attribution Impact: +{driver.impact:.3f}</div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        # Expandable simple explanation
-        with st.expander("How did the model decide?", expanded=False):
+        # Expandable Assessment Methodology
+        with st.expander("Model Assessment & Methodology", expanded=False):
             st.markdown(
                 """
-                **How Churn Risk is Calculated:**
-                - Our machine learning model (Extreme Gradient Boosting) reviews historical account patterns across 7,043 customers.
-                - Each factor (such as having a Month-to-month contract or a short tenure) pushes the predicted churn risk higher or lower.
-                - We use **SHAP (Shapley Additive Explanations)**, a mathematical framework from cooperative game theory, to measure the exact contribution of each profile feature to the final prediction.
-                - When features push the probability above our cost-optimized decision threshold (**0.23**), the account is flagged for proactive retention outreach.
+                **How the Prediction Works:**
+                * The model evaluates customer attributes against historical retention patterns across 7,043 subscriber profiles.
+                * Key factors (such as contract commitment, tenure, and payment methods) increase or decrease the predicted likelihood of churn.
+                * We use **SHAP (Shapley Additive Explanations)** to compute the exact contribution of each factor to this customer's result.
+                * Accounts with probabilities above the operational threshold (**0.23**) are categorized as higher risk to ensure timely review.
                 """
             )
 
-        # Suggested Next Step
-        st.markdown("#### Suggested Next Step")
+        # Suggested Review
+        st.markdown(
+            "<div style='font-size: 0.96rem; font-weight: 600; color: #172033; margin: 14px 0 4px 0;'>Suggested Review</div>",
+            unsafe_allow_html=True,
+        )
         if res.risk_level in ["CRITICAL", "HIGH"]:
             if contract == "Month-to-month":
-                action = "Offer an annual contract upgrade with a 10% loyalty incentive and complimentary onboarding."
+                action = "Review eligibility for an annual contract commitment with a standard loyalty incentive."
             elif internet == "Fiber optic" and support == "No":
-                action = "Provide a complimentary Tech Support add-on and conduct a remote line diagnostic check."
+                action = "Verify customer network stability and consider adding technical support assistance."
             else:
-                action = "Schedule a proactive customer success call with a tailored retention bundle."
-            st.warning(f"**Recommended Action:** {action}")
+                action = "Flag account for follow-up review by customer service prior to next renewal cycle."
+            st.info(f"**Recommended Action:** {action}")
         else:
-            st.success("**Account Healthy:** Maintain regular engagement. No promotional discount required.")
+            st.success("**Account Stable:** Customer shows healthy retention signals. Continue standard relationship.")

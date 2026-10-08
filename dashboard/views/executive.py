@@ -1,14 +1,14 @@
-"""Executive Overview view for C-Suite and Retention Directors."""
+"""Executive Overview view: Macro churn patterns, risk concentration, and scenario economics."""
 
 import pandas as pd
 import streamlit as st
 
+from dashboard.components.cards import render_metric_card
 from dashboard.components.charts import (
     plot_churn_by_contract,
     plot_churn_by_tenure_bucket,
     plot_risk_distribution,
 )
-from dashboard.components.risk_card import render_metric_card
 from src.telco_churn.config import PROJECT_ROOT, load_config
 from src.telco_churn.models.registry import load_production_artifact
 
@@ -18,12 +18,12 @@ def render_executive_overview() -> None:
 
     st.markdown(
         """
-        <div style="margin-bottom: 24px;">
-            <h1 style="font-size: 2.2rem; font-weight: 800; color: #f8fafc; margin-bottom: 4px;">
-                Customer Retention Overview
+        <div style="margin-bottom: 20px;">
+            <h1 style="font-size: 1.65rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
+                Executive Overview
             </h1>
-            <p style="color: #94a3b8; font-size: 1.05rem;">
-                Understand where churn risk is concentrated and which customer segments need attention.
+            <p style="color: #5B6577; font-size: 0.95rem; margin-bottom: 0;">
+                Monitor customer churn risk and understand where retention attention is most needed.
             </p>
         </div>
         """,
@@ -56,127 +56,175 @@ def render_executive_overview() -> None:
         else 0.0
     )
 
-    # Calculate actual high-risk customer estimate based on test holdout or historical proxy
-    test_rows = metadata.dataset_info.get("test_rows", 1409) if "metadata" in locals() else 1409
+    test_rows = 1409
     high_risk_flagged = holdout_metrics.get("true_positives", 351) + holdout_metrics.get("false_positives", 504)
     high_risk_pct = high_risk_flagged / max(test_rows, 1)
-    estimated_high_risk_portfolio = int(total_customers * high_risk_pct)
-    estimated_at_risk_clv = (total_clv * (historical_churn_rate))
+    estimated_high_risk_count = int(total_customers * high_risk_pct)
+    estimated_at_risk_value = total_clv * historical_churn_rate
 
     # Top KPI Metrics Row
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
         render_metric_card(
             title="Total Customers",
             value=f"{total_customers:,}",
-            subtext="California Subscriber Base",
-            color_class="indigo",
+            subtext="Active subscriber base evaluated",
+            color_class="blue",
         )
-    with col2:
+    with k2:
         render_metric_card(
             title="Historical Churn Rate",
             value=f"{historical_churn_rate:.1%}",
-            subtext="Observed Historical Baseline",
+            subtext="Observed baseline across dataset",
             color_class="rose",
         )
-    with col3:
+    with k3:
         render_metric_card(
             title="High-Risk Customers",
-            value=f"{estimated_high_risk_portfolio:,}",
-            subtext=f"~{high_risk_pct:.1%} Flagged at τ*={opt_thresh:.2f}",
+            value=f"{estimated_high_risk_count:,}",
+            subtext=f"~{high_risk_pct:.1%} flagged at threshold {opt_thresh:.2f}",
             color_class="amber",
         )
-    with col4:
+    with k4:
         render_metric_card(
-            title="At-Risk Portfolio CLV",
-            value=f"${estimated_at_risk_clv / 1e6:.2f}M",
-            subtext=f"≈ ₹{estimated_at_risk_clv * config.business.usd_to_inr_rate / 1e7:.1f} Cr Exposure",
+            title="At-Risk Customer Value",
+            value=f"${estimated_at_risk_value / 1e6:.2f}M",
+            subtext="Cumulative value exposed to churn",
             color_class="emerald",
         )
 
-    st.markdown(
-        "<hr style='border-color: rgba(255,255,255,0.08); margin: 24px 0;' />",
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # Strategic Retention Economics
-    st.subheader("💡 Strategic Retention Economics: Targeted Retention vs. Blanket Discounts")
-    with st.expander("Review Business Economics & Assumptions", expanded=True):
+    # Row 1 Charts: Churn by Contract & Churn by Tenure
+    r1_col1, r1_col2 = st.columns(2)
+    with r1_col1:
         st.markdown(
-            rf"""
-            - **Blanket Discount Strategy:** Providing a standard 15% discount across all {total_customers:,} accounts costs **\${total_customers * avg_monthly * 0.15 * 3:,.2f}** over a quarter, giving margin relief to ~73% of customers who would stay anyway.
-            - **Targeted AI Retention Strategy:** Contacting only the top-decile risk cohort identified by **Retention Priority Score** ($\sim 704$ accounts) with a targeted incentive (\${config.business.retention_offer_cost:.2f}) costs only **\${704 * config.business.retention_offer_cost:,.2f}** — saving over **75% in campaign spend** while preventing high-CLV churn!
-            - **Configured Currency Assumption:** Base currency is USD ($); INR (₹) displayed at a configured assumption of ₹{config.business.usd_to_inr_rate:.2f}/USD.
             """
+            <div style="font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+                Observed Churn by Contract Type
+            </div>
+            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
+                Historical churn rate across subscriber contract commitments.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-
-    st.markdown(
-        "<hr style='border-color: rgba(255,255,255,0.08); margin: 24px 0;' />",
-        unsafe_allow_html=True,
-    )
-
-    # Charts Grid
-    col_left, col_right = st.columns(2)
-    with col_left:
-        st.subheader("Churn by Contract Type")
-        st.caption("Observed churn frequency across customer contract agreements.")
         fig_contract = plot_churn_by_contract(df)
         st.plotly_chart(fig_contract, width="stretch")
         st.markdown(
             """
-            > **Business takeaway:** Month-to-month contracts demonstrate a **42.7% churn rate** (>8x higher than 2-year contracts at 2.8%). Migrating month-to-month subscribers into annual commitments is the primary retention lever.
-            """
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #334155; margin-top: 4px;">
+                <b>Business takeaway:</b> Month-to-month customers show the highest observed churn rate (42.7%) in this dataset, compared to 2.8% for two-year contracts. Encouraging annual commitments represents a primary retention opportunity.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
-    with col_right:
-        st.subheader("Churn by Tenure Cohort")
-        st.caption("Distribution of churn risk relative to subscriber tenure.")
+    with r1_col2:
+        st.markdown(
+            """
+            <div style="font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+                Observed Churn by Tenure Cohort
+            </div>
+            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
+                Observed churn rate grouped by customer tenure bands.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         fig_tenure = plot_churn_by_tenure_bucket(df)
         st.plotly_chart(fig_tenure, width="stretch")
         st.markdown(
             """
-            > **Business takeaway:** The steepest drop-off occurs within the first 12 months (first-year retention cliff). Retention initiatives must focus on onboarding during months 1–6 to protect long-term customer lifetime value.
-            """
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #334155; margin-top: 4px;">
+                <b>Business takeaway:</b> Churn is concentrated in the first 12 months of customer tenure. Onboarding engagement and early satisfaction checks during months 1–6 are critical to building long-term retention.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
-    st.markdown(
-        "<hr style='border-color: rgba(255,255,255,0.08); margin: 24px 0;' />",
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
-    # Risk Distribution & Top Drivers Grid
-    col_risk, col_drivers = st.columns(2)
-    with col_risk:
-        st.subheader("Model-Predicted Risk Distribution")
-        st.caption("Distribution across calibrated risk tiers at operational threshold τ* = 0.23:")
-        # Display distribution from holdout test set
+    # Row 2 Charts: Risk Distribution & Top Churn Drivers
+    r2_col1, r2_col2 = st.columns(2)
+    with r2_col1:
+        st.markdown(
+            """
+            <div style="font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+                Model-Predicted Risk Distribution
+            </div>
+            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
+                Customer segmentation into actionable risk tiers based on model probability.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         test_counts = {
-            "CRITICAL": 312,
-            "HIGH": 543,
-            "MEDIUM": 268,
             "LOW": 286,
+            "MEDIUM": 268,
+            "HIGH": 543,
+            "CRITICAL": 312,
         }
         fig_risk = plot_risk_distribution(test_counts)
         st.plotly_chart(fig_risk, width="stretch")
         st.markdown(
             """
-            > **Business takeaway:** Rather than treating churn as a binary event, calibrated risk tiers allow operational teams to route Critical and High risk accounts to direct human account managers, while Medium risk receives automated digital nurture.
-            """
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #334155; margin-top: 4px;">
+                <b>Business takeaway:</b> Segmenting subscribers into calibrated risk bands allows the retention team to focus direct outreach on Critical and High-risk tiers, while using automated digital messaging for Medium-risk accounts.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
-    with col_drivers:
-        st.subheader("Top Global Churn Drivers")
-        st.caption("Primary drivers identified by tree Shapley feature attributions:")
+    with r2_col2:
         st.markdown(
             """
-            1. **Month-to-month Contract:** Strongest driver accelerating churn hazard across all demographic cohorts.
-            2. **Tenure (Months):** Strongest protective factor; churn probability decreases exponentially after 24 months of tenure.
-            3. **Fiber Optic without Tech Support:** Customers paying high monthly bills for fiber optic who lack support add-ons show elevated churn propensity.
-            4. **Electronic Check Payment:** Higher payment friction and manual touchpoints correlate strongly with service cancellation.
-            """
+            <div style="font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+                Primary Churn Risk Factors
+            </div>
+            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
+                Key contributing factors identified by the model across customer profiles.
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
         st.markdown(
             """
-            > **Business takeaway:** Addressing product-level service friction (bundling tech support with fiber optic and promoting automatic credit card billing) directly targets the underlying root causes of cancellation.
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 16px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.88rem; font-weight: 600; color: #172033;">1. Month-to-month contract commitment</span>
+                    <span style="font-size: 0.74rem; background: #FEF2F2; color: #B91C1C; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Elevates risk</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.88rem; font-weight: 600; color: #172033;">2. Short account tenure (under 12 months)</span>
+                    <span style="font-size: 0.74rem; background: #FEF2F2; color: #B91C1C; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Elevates risk</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 0.88rem; font-weight: 600; color: #172033;">3. Fiber optic internet without technical support</span>
+                    <span style="font-size: 0.74rem; background: #FEF2F2; color: #B91C1C; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Elevates risk</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.88rem; font-weight: 600; color: #172033;">4. Long tenure (24+ months)</span>
+                    <span style="font-size: 0.74rem; background: #F0FDF4; color: #15803D; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Protective factor</span>
+                </div>
+            </div>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; color: #334155;">
+                <b>Business takeaway:</b> Product bundling (such as including technical support with fiber optic connections) directly addresses recurring friction points observed among churning subscribers.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+
+    # Illustrative Retention Economics Scenario
+    with st.expander("Illustrative Retention Economics: Targeted Retention vs. Blanket Discounts", expanded=False):
+        st.markdown(
+            f"""
+            This scenario model compares the estimated cost of blanket discounting against targeted retention:
+            
+            * **Blanket Discount Scenario:** Offering an un-targeted 15% discount across all {total_customers:,} subscribers would cost approximately **${total_customers * avg_monthly * 0.15 * 3:,.0f}** over a quarter. Most of this spend would reach customers who were likely to remain without intervention.
+            * **Targeted Campaign Scenario:** Focusing retention incentives (assumed at **${config.business.retention_offer_cost:.2f}** per contacted customer) only on the highest-priority decile (~{int(total_customers * 0.10):,} accounts) would cost approximately **${int(total_customers * 0.10) * config.business.retention_offer_cost:,.0f}**.
+            * **Configured Assumption Note:** This comparison represents a business scenario model based on configured parameters (${config.business.retention_offer_cost:.2f} offer cost and 15% discount assumption). Actual ROI will depend on campaign redemption and trial outcomes.
             """
         )

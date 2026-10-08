@@ -1,6 +1,7 @@
-"""Main Streamlit Application for Telco Customer Churn & Retention Optimization Platform.
+"""Main Streamlit Application for Telco Customer Churn & Retention Intelligence Platform.
 
-Single entry-point architecture ensuring consistent routing, session management, and state.
+Single entry-point enterprise architecture ensuring consistent routing, state management,
+and an accessible, professional light visual theme.
 """
 
 import sys
@@ -19,15 +20,15 @@ from dashboard.views.prediction import render_customer_prediction
 from dashboard.views.prioritization import render_retention_prioritization
 from src.telco_churn.config import load_config
 
-# Page Configuration
+# Page Configuration - Strictly Light Enterprise Visual System
 st.set_page_config(
-    page_title="Telco Retention Intelligence Platform",
-    page_icon="📡",
+    page_title="Telco Churn - Retention Intelligence",
+    page_icon="TC",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Custom Design System CSS (Modern Slate/Navy Theme, Accessible Contrast, Responsive Layout)
+# Custom Design System CSS (Enterprise Light Theme, High Contrast, Accessible Spacing)
 CUSTOM_CSS = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -36,77 +37,95 @@ CUSTOM_CSS = """
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    /* Professional Light Theme Page Background and Typography */
     .stApp {
-        background-color: #0b1120;
-        color: #f8fafc;
+        background-color: #F5F7FA;
+        color: #172033;
     }
 
-    /* Sidebar Customization */
+    /* Enterprise Sidebar Customization */
     section[data-testid="stSidebar"] {
-        background-color: #0f172a !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background-color: #FFFFFF !important;
+        border-right: 1px solid #E2E8F0 !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stSidebarUserContent"] {
+        padding-top: 1.5rem;
     }
 
-    /* Primary Accent Buttons */
+    /* Primary Buttons (Restrained Corporate Blue) */
     .stButton > button {
-        background: #4f46e5;
-        color: #ffffff;
+        background-color: #2563EB;
+        color: #FFFFFF;
         font-weight: 600;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
-        padding: 0.55rem 1.25rem;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+        font-size: 0.88rem;
+        border: 1px solid #1D4ED8;
+        border-radius: 6px;
+        padding: 0.5rem 1.25rem;
+        transition: all 0.15s ease-in-out;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
     .stButton > button:hover {
-        background: #4338ca;
-        border-color: rgba(255, 255, 255, 0.25);
+        background-color: #1D4ED8;
+        border-color: #1E40AF;
+        color: #FFFFFF;
         transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+        box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+    }
+    .stButton > button:active {
+        background-color: #1E40AF;
+        transform: translateY(0);
     }
 
     /* Form Fields and Inputs */
     div[data-baseweb="select"] > div {
-        background-color: #1e293b !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
-        color: #f8fafc !important;
-        border-radius: 8px !important;
+        background-color: #FFFFFF !important;
+        border-color: #CBD5E1 !important;
+        color: #172033 !important;
+        border-radius: 6px !important;
     }
     input[type="text"], input[type="number"] {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 8px !important;
+        background-color: #FFFFFF !important;
+        color: #172033 !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 6px !important;
     }
     input[type="text"]:focus, input[type="number"]:focus {
-        border-color: #6366f1 !important;
+        border-color: #2563EB !important;
+        box-shadow: 0 0 0 1px #2563EB !important;
     }
 
     /* Tables & DataFrames */
     div[data-testid="stDataFrame"] {
-        background-color: rgba(30, 41, 59, 0.45);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background-color: #FFFFFF;
+        border-radius: 6px;
+        border: 1px solid #E2E8F0;
     }
 
-    /* Custom Radio Navigation Styling */
+    /* Clean Enterprise Radio Navigation */
     div[data-testid="stRadio"] > div {
-        gap: 6px;
+        gap: 4px;
     }
     div[data-testid="stRadio"] label {
-        padding: 6px 10px;
+        padding: 7px 12px;
         border-radius: 6px;
-        transition: background-color 0.15s ease;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: #334155;
+        transition: all 0.15s ease;
     }
     div[data-testid="stRadio"] label:hover {
-        background-color: rgba(255, 255, 255, 0.04);
+        background-color: #F1F5F9;
+        color: #0F172A;
     }
 
     /* Typography */
     h1, h2, h3, h4 {
-        color: #f8fafc !important;
+        color: #172033 !important;
         font-weight: 700;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.01em;
+    }
+    p, span, label {
+        color: #172033;
     }
 </style>
 """
@@ -116,18 +135,18 @@ st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 def main() -> None:
     _ = load_config()
 
-    # Sidebar Brand Header
+    # Sidebar Enterprise Brand Header
     with st.sidebar:
         st.markdown(
             """
             <div style="margin-bottom: 24px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="background: linear-gradient(135deg, #4f46e5, #06b6d4); border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                        📡
+                    <div style="background-color: #2563EB; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 800; font-size: 15px; letter-spacing: -0.02em;">
+                        TC
                     </div>
                     <div>
-                        <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: -0.01em;">TELCO CHURN</div>
-                        <div style="font-size: 0.72rem; color: #818cf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">Retention Intelligence</div>
+                        <div style="font-size: 1.05rem; font-weight: 800; color: #172033; letter-spacing: -0.01em; line-height: 1.2;">TELCO CHURN</div>
+                        <div style="font-size: 0.70rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Retention Intelligence</div>
                     </div>
                 </div>
             </div>
@@ -136,18 +155,18 @@ def main() -> None:
         )
 
         st.markdown(
-            "<div style='font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;'>NAVIGATION</div>",
+            "<div style='font-size: 0.72rem; color: #5B6577; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;'>NAVIGATION</div>",
             unsafe_allow_html=True,
         )
 
         nav_options = [
-            "🏠 Executive Overview",
-            "🎯 Customer Prediction",
-            "📊 Retention Prioritization",
-            "🧠 Model Insights",
+            "Executive Overview",
+            "Customer Prediction",
+            "Retention Prioritization",
+            "Model Insights",
         ]
 
-        # Query param or session state recovery
+        # Query param recovery for deep-linking
         query_view = st.query_params.get("view", None)
         default_index = 0
         if query_view:
@@ -164,21 +183,21 @@ def main() -> None:
         )
 
         st.markdown(
-            "<hr style='border-color: rgba(255,255,255,0.08); margin: 20px 0;' />",
+            "<hr style='border: none; border-top: 1px solid #E2E8F0; margin: 20px 0;' />",
             unsafe_allow_html=True,
         )
 
         # Verified Model Status Section
         render_sidebar_status()
 
-    # Route to Selected View
-    if "Executive Overview" in selected_page:
+    # Route to Selected View (Deterministic single-source dispatch)
+    if selected_page == "Executive Overview":
         render_executive_overview()
-    elif "Customer Prediction" in selected_page:
+    elif selected_page == "Customer Prediction":
         render_customer_prediction()
-    elif "Retention Prioritization" in selected_page:
+    elif selected_page == "Retention Prioritization":
         render_retention_prioritization()
-    elif "Model Insights" in selected_page:
+    elif selected_page == "Model Insights":
         render_model_insights()
 
 

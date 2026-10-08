@@ -25,6 +25,7 @@ RUN useradd -m -u 1000 appuser && \
 # Copy application source code and resources
 COPY --chown=appuser:appuser src/ ./src/
 COPY --chown=appuser:appuser dashboard/ ./dashboard/
+COPY --chown=appuser:appuser .streamlit/ ./.streamlit/
 COPY --chown=appuser:appuser configs/ ./configs/
 COPY --chown=appuser:appuser models/ ./models/
 COPY --chown=appuser:appuser reports/ ./reports/

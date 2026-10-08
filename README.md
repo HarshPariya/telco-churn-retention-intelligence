@@ -242,12 +242,12 @@ Interactive documentation is available at `http://localhost:8000/docs`.
 
 ## 15. Streamlit Intelligence Dashboard
 
-The frontend analytics application (`dashboard/app.py`) provides four executive modules:
+The frontend analytics application (`dashboard/app.py`) is styled in an enterprise light design system (`#F5F7FA` page, `#FFFFFF` surfaces, `#172033` charcoal typography, `#2563EB` corporate blue accents) with zero dark mode switches, and structured into exactly four business views:
 
-1. **Executive Overview:** High-level subscriber KPIs, CFO ROI comparison, and churn distribution curves.
-2. **Customer Prediction:** Single customer diagnostic form with real-time risk tier badges, CLV, priority score, top 3 SHAP drivers, and prescriptive retention actions.
-3. **Retention Prioritization:** Bulk CSV upload, automated scoring, priority bubble matrix, and downloadable ranked call list.
-4. **Model Insights:** Holdout confusion matrix, ROC/PR curves, global SHAP beeswarm plots, and multi-model benchmark leaderboard.
+1. **Executive Overview:** High-level subscriber KPIs (Total Customers, Historical Churn Rate, Flagged Accounts, At-Risk CLV), churn breakdown by contract and tenure, risk tier distribution, primary churn factors, and illustrative retention economics scenarios.
+2. **Customer Prediction:** Structured 3-step diagnostic workflow (Customer Profile, Account & Billing, Services) with transparent risk badges, CLV, retention priority, and top 3 actual SHAP drivers explained in plain business language.
+3. **Retention Prioritization:** Methodology banner (`Priority = Churn Probability × CLV`), bulk CSV upload + 1-click sample cohort evaluation (300 accounts), summary KPIs, risk distribution, and filterable/exportable ranked call queue.
+4. **Model Insights:** Holdout test performance metrics (ROC-AUC 0.8439, PR-AUC 0.6582, Recall 93.85%, Precision 41.05%, F1 0.5712, Brier 0.1631), multi-model benchmark leaderboard, diagnostic curves, global SHAP beeswarm attribution, and decision threshold governance.
 
 ---
 
