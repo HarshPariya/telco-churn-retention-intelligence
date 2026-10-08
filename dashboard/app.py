@@ -19,10 +19,12 @@ from dashboard.components.tokens import (
     COLOR_BORDER,
     COLOR_PAGE_BG,
     COLOR_PRIMARY_BRAND,
+    COLOR_PRIMARY_BRAND_DARK,
     COLOR_PRIMARY_SURFACE,
     COLOR_PRIMARY_TEXT,
     COLOR_SECONDARY_SURFACE,
     COLOR_SECONDARY_TEXT,
+    FONT_FAMILY,
 )
 from dashboard.views.executive import render_executive_overview
 from dashboard.views.model_insights import render_model_insights
@@ -41,10 +43,8 @@ st.set_page_config(
 # Custom Design System CSS
 CUSTOM_CSS = f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-    html, body, [class*="css"], [class*="st-"] {{
-        font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    html, body, [class*="css"] {{
+        font-family: {FONT_FAMILY};
     }}
 
     /* Warm Ivory Page Background & Espresso Typography */
@@ -62,96 +62,28 @@ CUSTOM_CSS = f"""
         padding-top: 1.5rem;
     }}
 
-    /* Primary Action Buttons (Clean Enterprise Green) */
-    button,
-    button[kind="primary"],
-    button[kind="secondary"],
-    .stButton > button,
-    .stButton button,
-    .stDownloadButton > button,
-    .stDownloadButton button,
-    .stFormSubmitButton > button,
-    .stFormSubmitButton button,
-    div[data-testid="stButton"] > button,
-    div[data-testid="stDownloadButton"] > button,
-    div[data-testid="stFormSubmitButton"] > button {{
-        background-color: #15803D !important;
-        border: 1px solid #166534 !important;
-        border-radius: 8px !important;
-        padding: 0.55rem 1.35rem !important;
-        transition: all 0.15s ease-in-out !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10) !important;
-        cursor: pointer !important;
-    }}
-
-    button:hover,
-    button[kind="primary"]:hover,
-    button[kind="secondary"]:hover,
-    .stButton > button:hover,
-    .stButton button:hover,
-    .stDownloadButton > button:hover,
-    .stDownloadButton button:hover,
-    .stFormSubmitButton > button:hover,
-    .stFormSubmitButton button:hover,
-    div[data-testid="stButton"] > button:hover,
-    div[data-testid="stDownloadButton"] > button:hover,
-    div[data-testid="stFormSubmitButton"] > button:hover {{
-        background-color: #166534 !important;
-        border-color: #14532D !important;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
-    }}
-
-    button:active,
-    button[kind="primary"]:active,
-    button[kind="secondary"]:active,
-    .stButton > button:active,
-    .stButton button:active,
-    .stDownloadButton > button:active,
-    .stDownloadButton button:active,
-    .stFormSubmitButton > button:active,
-    .stFormSubmitButton button:active,
-    div[data-testid="stButton"] > button:active,
-    div[data-testid="stDownloadButton"] > button:active,
-    div[data-testid="stFormSubmitButton"] > button:active {{
-        background-color: #14532D !important;
-        transform: translateY(0);
-    }}
-
-    /* High-contrast crisp white typography inside ALL buttons */
-    button,
-    button *,
-    button p,
-    button span,
-    button div,
-    .stButton button,
-    .stButton button *,
-    .stButton button p,
-    .stButton button span,
-    .stButton button div,
-    .stButton div[data-testid="stMarkdownContainer"] p,
-    .stDownloadButton button,
-    .stDownloadButton button *,
-    .stDownloadButton button p,
-    .stDownloadButton button span,
-    .stDownloadButton button div,
-    .stDownloadButton div[data-testid="stMarkdownContainer"] p,
-    .stFormSubmitButton button,
-    .stFormSubmitButton button *,
-    .stFormSubmitButton button p,
-    .stFormSubmitButton button span,
-    .stFormSubmitButton button div,
-    .stFormSubmitButton div[data-testid="stMarkdownContainer"] p,
-    div[data-testid="stButton"] button p,
-    div[data-testid="stDownloadButton"] button p,
-    div[data-testid="stFormSubmitButton"] button p {{
-        color: #FFFFFF !important;
-        font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    /* Primary Action Buttons (Muted Olive) */
+    .stButton > button {{
+        background-color: {COLOR_PRIMARY_BRAND} !important;
+        color: #FFFDF8 !important;
         font-weight: 600 !important;
-        font-size: 0.90rem !important;
-        line-height: 1.4 !important;
-        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.20) !important;
-        -webkit-font-smoothing: antialiased !important;
+        font-size: 0.88rem !important;
+        border: 1px solid {COLOR_PRIMARY_BRAND_DARK} !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1.25rem !important;
+        transition: all 0.15s ease-in-out !important;
+        box-shadow: 0 1px 3px rgba(45, 41, 36, 0.08) !important;
+    }}
+    .stButton > button:hover {{
+        background-color: {COLOR_PRIMARY_BRAND_DARK} !important;
+        border-color: #38422C !important;
+        color: #FFFDF8 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(45, 41, 36, 0.12) !important;
+    }}
+    .stButton > button:active {{
+        background-color: #38422C !important;
+        transform: translateY(0);
     }}
 
     /* Warm Inputs and Selects */
@@ -168,15 +100,44 @@ CUSTOM_CSS = f"""
         border-radius: 8px !important;
     }}
     input[type="text"]:focus, input[type="number"]:focus {{
-        border-color: #15803D !important;
-        box-shadow: 0 0 0 1px #15803D !important;
+        border-color: {COLOR_PRIMARY_BRAND} !important;
+        box-shadow: 0 0 0 1px {COLOR_PRIMARY_BRAND} !important;
+    }}
+
+    /* Prevent washed-out dimming during script reruns */
+    div[data-testid="stAppViewBlockContainer"] {{
+        opacity: 1 !important;
+        transition: none !important;
+    }}
+    .stApp [data-testid="stAppViewBlockContainer"] {{
+        opacity: 1 !important;
+    }}
+    div[data-testid="stAppViewContainer"] {{
+        opacity: 1 !important;
+    }}
+
+    /* High-Contrast Crisp Multiselect Tags */
+    div[data-baseweb="tag"] {{
+        background-color: #EAE3D6 !important;
+        border: 1px solid #CFC4B4 !important;
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+    }}
+    div[data-baseweb="tag"] span {{
+        color: {COLOR_PRIMARY_TEXT} !important;
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+    }}
+    div[data-baseweb="tag"] svg {{
+        fill: {COLOR_PRIMARY_TEXT} !important;
     }}
 
     /* DataFrames & Tables */
     div[data-testid="stDataFrame"] {{
-        background-color: {COLOR_PRIMARY_SURFACE};
-        border-radius: 8px;
-        border: 1px solid {COLOR_BORDER};
+        background-color: {COLOR_PRIMARY_SURFACE} !important;
+        border-radius: 8px !important;
+        border: 1px solid {COLOR_BORDER} !important;
+        box-shadow: 0 1px 3px rgba(45, 41, 36, 0.04) !important;
     }}
 
     /* Clean Enterprise Navigation */
@@ -196,15 +157,13 @@ CUSTOM_CSS = f"""
         color: {COLOR_PRIMARY_TEXT};
     }}
 
-    /* Typography (Scoped so buttons are never overridden by dark text) */
+    /* Typography */
     h1, h2, h3, h4 {{
         color: {COLOR_PRIMARY_TEXT} !important;
         font-weight: 700;
         letter-spacing: -0.01em;
     }}
-    p:not(button *):not(.stButton *):not(.stDownloadButton *):not(.stFormSubmitButton *),
-    span:not(button *):not(.stButton *):not(.stDownloadButton *):not(.stFormSubmitButton *),
-    label:not(button *):not(.stButton *):not(.stDownloadButton *):not(.stFormSubmitButton *) {{
+    p, span, label {{
         color: {COLOR_PRIMARY_TEXT};
     }}
 </style>

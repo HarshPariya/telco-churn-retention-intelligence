@@ -40,7 +40,9 @@ def plot_risk_distribution(counts_dict: dict) -> go.Figure:
                 marker={"colors": color_seq, "line": {"color": "#FFFDF8", "width": 2}},
                 textinfo="label+percent",
                 hoverinfo="label+value+percent",
-                textfont={"color": "#FFFDF8", "size": 12, "family": FONT_FAMILY},
+                texttemplate="<b>%{label}</b><br>%{percent}",
+                textfont={"color": "#FFFFFF", "size": 13, "family": FONT_FAMILY},
+                insidetextorientation="horizontal",
             )
         ]
     )
@@ -166,6 +168,12 @@ def plot_priority_scatter(df_results: pd.DataFrame) -> go.Figure:
             "clv": "Customer Lifetime Value ($)",
             "risk_level": "Risk Level",
         },
+    )
+    fig.update_traces(
+        marker={
+            "opacity": 0.85,
+            "line": {"width": 1, "color": "rgba(45, 41, 36, 0.35)"},
+        }
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",

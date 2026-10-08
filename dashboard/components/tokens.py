@@ -19,8 +19,8 @@ COLOR_SECONDARY_TEXT = "#6F675D"  # Muted Warm Charcoal
 COLOR_TERTIARY_TEXT = "#948A7D"   # Disabled / Tertiary Text
 
 # Brand & Accent Tokens
-COLOR_PRIMARY_BRAND = "#15803D"   # Clean Enterprise Green
-COLOR_PRIMARY_BRAND_DARK = "#166534" # Deep Green (Hover / Active)
+COLOR_PRIMARY_BRAND = "#5E6B4A"   # Muted Olive / Sage
+COLOR_PRIMARY_BRAND_DARK = "#465238" # Deep Olive (Hover / Active)
 COLOR_SECONDARY_ACCENT = "#A56B4F" # Restrained Terracotta
 
 # Semantic Risk Tokens

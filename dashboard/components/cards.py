@@ -25,6 +25,16 @@ from dashboard.components.tokens import (
 )
 
 
+def render_clean_html(html_str: str) -> None:
+    """Render HTML safely without markdown code block interpretation.
+    
+    Strips leading and trailing whitespace from every line to ensure
+    Streamlit/CommonMark does not parse 4-space indented HTML tags as <pre><code>.
+    """
+    cleaned = "\n".join(line.strip() for line in html_str.strip().splitlines())
+    st.markdown(cleaned, unsafe_allow_html=True)
+
+
 def render_metric_card(
     title: str,
     value: str,
@@ -53,16 +63,7 @@ def render_metric_card(
     border_top_css = f"border-top: 3px solid {accent_color};" if accent_bar else ""
 
     html = f"""
-    <div style="
-        background: {COLOR_PRIMARY_SURFACE};
-        border: 1px solid {COLOR_BORDER};
-        {border_top_css}
-        border-radius: 10px;
-        padding: 14px 16px;
-        box-shadow: 0 3px 12px rgba(45, 41, 36, 0.04);
-        margin-bottom: 12px;
-        min-height: 105px;
-    ">
+    <div style="background: {COLOR_PRIMARY_SURFACE}; border: 1px solid {COLOR_BORDER}; {border_top_css} border-radius: 10px; padding: 14px 16px; box-shadow: 0 3px 12px rgba(45, 41, 36, 0.04); margin-bottom: 12px; min-height: 105px;">
         <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
             {title}
         </div>
@@ -74,10 +75,15 @@ def render_metric_card(
         </div>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    render_clean_html(html)
 
 
-def render_risk_badge(risk_level: str, probability: float, clv: Optional[float] = None, priority: Optional[float] = None) -> None:
+def render_risk_badge(
+    risk_level: str,
+    probability: float,
+    clv: Optional[float] = None,
+    priority: Optional[float] = None,
+) -> None:
     """Render an accessible, soft warm risk tier summary banner."""
     style = RISK_BADGE_CONFIG.get(
         risk_level,
@@ -94,53 +100,28 @@ def render_risk_badge(risk_level: str, probability: float, clv: Optional[float] 
     if clv is not None and priority is not None:
         clv_block = f"""
         <div style="border-left: 1px solid {style['border']}; padding-left: 18px; margin-left: 18px;">
-            <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600;">
-                Customer Value (CLV)
-            </div>
-            <div style="font-size: 1.25rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 2px;">
-                ${clv:,.2f}
-            </div>
-            <div style="font-size: 0.74rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 1px;">
-                Priority Score: <b>{priority:,.1f}</b>
-            </div>
+            <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600;">Customer Value (CLV)</div>
+            <div style="font-size: 1.25rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 2px;">${clv:,.2f}</div>
+            <div style="font-size: 0.74rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 1px;">Priority Score: <b>{priority:,.1f}</b></div>
         </div>
         """
 
     html = f"""
-    <div style="
-        background: {style['bg']};
-        border: 1px solid {style['border']};
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin-bottom: 18px;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    ">
+    <div style="background: {style['bg']}; border: 1px solid {style['border']}; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
         <div style="flex: 1; min-width: 200px;">
-            <div style="font-size: 0.80rem; font-weight: 700; color: {style['text']}; letter-spacing: 0.05em;">
-                {style['label']}
-            </div>
-            <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 3px;">
-                {style['desc']}
-            </div>
+            <div style="font-size: 0.80rem; font-weight: 700; color: {style['text']}; letter-spacing: 0.05em;">{style['label']}</div>
+            <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 3px;">{style['desc']}</div>
         </div>
         <div style="display: flex; align-items: center; text-align: right;">
             <div>
-                <div style="font-size: 2.1rem; font-weight: 800; color: {style['text']}; line-height: 1;">
-                    {probability:.1%}
-                </div>
-                <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600; margin-top: 3px;">
-                    Estimated Churn Probability
-                </div>
+                <div style="font-size: 2.1rem; font-weight: 800; color: {style['text']}; line-height: 1;">{probability:.1%}</div>
+                <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600; margin-top: 3px;">Estimated Churn Probability</div>
             </div>
             {clv_block}
         </div>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    render_clean_html(html)
 
 
 def render_driver_card(feature: str, direction: str, impact: float, rank: int) -> None:
@@ -152,63 +133,26 @@ def render_driver_card(feature: str, direction: str, impact: float, rank: int) -
     direction_label = "Increases predicted risk" if is_risk else "Reduces predicted risk"
 
     html = f"""
-    <div style="
-        background: {COLOR_PRIMARY_SURFACE};
-        border: 1px solid {COLOR_BORDER};
-        border-left: 3px solid {border_color};
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    ">
+    <div style="background: {COLOR_PRIMARY_SURFACE}; border: 1px solid {COLOR_BORDER}; border-left: 3px solid {border_color}; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <div style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
-                Factor #{rank}
-            </div>
-            <div style="font-size: 0.94rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
-                {feature}
-            </div>
+            <div style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Factor #{rank}</div>
+            <div style="font-size: 0.94rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">{feature}</div>
         </div>
         <div style="text-align: right;">
-            <span style="
-                background: {badge_bg};
-                color: {badge_text};
-                font-size: 0.75rem;
-                font-weight: 600;
-                padding: 3px 8px;
-                border-radius: 4px;
-                display: inline-block;
-            ">
-                {direction_label}
-            </span>
-            <div style="font-size: 0.72rem; color: {COLOR_TERTIARY_TEXT}; margin-top: 3px;">
-                Relative impact: +{impact:.3f}
-            </div>
+            <span style="background: {badge_bg}; color: {badge_text}; font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 4px; display: inline-block;">{direction_label}</span>
+            <div style="font-size: 0.72rem; color: {COLOR_TERTIARY_TEXT}; margin-top: 3px;">Relative impact: +{impact:.3f}</div>
         </div>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    render_clean_html(html)
 
 
 def render_empty_state(message: str, subtext: str = "") -> None:
     """Render a restrained warm empty state container."""
     html = f"""
-    <div style="
-        background: {COLOR_PRIMARY_SURFACE};
-        border: 1px dashed {COLOR_BORDER};
-        border-radius: 10px;
-        padding: 32px 24px;
-        text-align: center;
-        margin: 16px 0;
-    ">
-        <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT};">
-            {message}
-        </div>
-        <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 4px;">
-            {subtext}
-        </div>
+    <div style="background: {COLOR_PRIMARY_SURFACE}; border: 1px dashed {COLOR_BORDER}; border-radius: 10px; padding: 32px 24px; text-align: center; margin: 16px 0;">
+        <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT};">{message}</div>
+        <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 4px;">{subtext}</div>
     </div>
     """
-    st.markdown(html, unsafe_allow_html=True)
+    render_clean_html(html)

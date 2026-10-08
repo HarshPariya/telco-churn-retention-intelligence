@@ -118,37 +118,58 @@ def render_retention_prioritization() -> None:
         )
         return
 
-    # Run Batch Scoring
-    with st.spinner(f"Evaluating {len(df_to_process)} accounts and computing contributing factors..."):
-        try:
-            batch_response = predictor.predict_dataframe(df_to_process, batch_explain=True)
-        except Exception:
-            st.error("Unable to score this cohort. Please ensure input columns match the standard customer schema.")
-            return
+    # Cohort identification key for session caching
+    cohort_key = f"upload_{uploaded_file.name}_{uploaded_file.size}" if uploaded_file else "sample_cohort_300"
 
-    results_list = []
-    for p in batch_response.predictions:
-        top_driver_name = p.top_drivers[0].feature if p.top_drivers else "N/A"
-        top_driver_dir = "↑" if (p.top_drivers and p.top_drivers[0].direction == "INCREASES_CHURN") else "↓"
-        contract_val = df_to_process.loc[
-            df_to_process.get("customerID", df_to_process.index) == p.customer_id, "Contract"
-        ].values if "Contract" in df_to_process.columns else ["Unknown"]
-        contract_str = str(contract_val[0]) if len(contract_val) > 0 else "Month-to-month"
+    # Reset cache if explicitly requested via button
+    if load_sample:
+        st.session_state.pop("cached_prioritization_df", None)
+        st.session_state.pop("cached_cohort_key", None)
 
-        results_list.append(
-            {
-                "Customer ID": p.customer_id,
-                "Churn Probability": p.churn_probability,
-                "Risk": p.risk_level,
-                "Contract": contract_str,
-                "CLV": p.clv,
-                "Retention Priority": p.retention_priority_score,
-                "Top Driver": f"{top_driver_name} {top_driver_dir}",
-            }
-        )
+    # Use cached evaluated dataframe if cohort matches
+    if (
+        "cached_prioritization_df" in st.session_state
+        and st.session_state.get("cached_cohort_key") == cohort_key
+    ):
+        results_df = st.session_state["cached_prioritization_df"]
+    else:
+        # Run Batch Scoring
+        with st.spinner(f"Evaluating {len(df_to_process)} accounts and computing contributing factors..."):
+            try:
+                batch_response = predictor.predict_dataframe(df_to_process, batch_explain=True)
+            except Exception:
+                st.error("Unable to score this cohort. Please ensure input columns match the standard customer schema.")
+                return
 
-    results_df = pd.DataFrame(results_list)
-    results_df = results_df.sort_values(by="Retention Priority", ascending=False).reset_index(drop=True)
+        results_list = []
+        for p in batch_response.predictions:
+            top_driver_name = p.top_drivers[0].feature if p.top_drivers else "N/A"
+            top_driver_dir = "↑" if (p.top_drivers and p.top_drivers[0].direction == "INCREASES_CHURN") else "↓"
+            contract_val = (
+                df_to_process.loc[
+                    df_to_process.get("customerID", df_to_process.index) == p.customer_id, "Contract"
+                ].values
+                if "Contract" in df_to_process.columns
+                else ["Unknown"]
+            )
+            contract_str = str(contract_val[0]) if len(contract_val) > 0 else "Month-to-month"
+
+            results_list.append(
+                {
+                    "Customer ID": p.customer_id,
+                    "Churn Probability": p.churn_probability,
+                    "Risk": p.risk_level,
+                    "Contract": contract_str,
+                    "CLV": p.clv,
+                    "Retention Priority": p.retention_priority_score,
+                    "Top Driver": f"{top_driver_name} {top_driver_dir}",
+                }
+            )
+
+        results_df = pd.DataFrame(results_list)
+        results_df = results_df.sort_values(by="Retention Priority", ascending=False).reset_index(drop=True)
+        st.session_state["cached_prioritization_df"] = results_df
+        st.session_state["cached_cohort_key"] = cohort_key
 
     # Summary KPIs
     total_evaluated = len(results_df)
@@ -240,7 +261,7 @@ def render_retention_prioritization() -> None:
         unsafe_allow_html=True,
     )
 
-    f1, f2, f3, f4 = st.columns(4)
+    f1, f2, f3, f4 = st.columns([1.75, 1.45, 0.9, 0.9])
     with f1:
         selected_tiers = st.multiselect(
             "Filter by Risk Level",
@@ -308,5 +329,6 @@ def render_retention_prioritization() -> None:
         data=csv_buffer.getvalue(),
         file_name="prioritized_customer_retention_queue.csv",
         mime="text/csv",
+        type="primary",
         width="stretch",
     )
