@@ -353,14 +353,24 @@ python scripts/train_model.py
 python scripts/evaluate_model.py
 python scripts/generate_reports.py
 
-# Run test suite
+# Run test suite and linter
 pytest tests/ -v
+ruff check .
 
-# Launch API service
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+# Free any lingering ports (if needed)
+python scripts/kill_ports.py
 
-# Launch Dashboard
-streamlit run dashboard/app.py --server.port 8501
+# Launch API service:
+# Option A (Windows PowerShell helper):
+.\run_api.ps1
+# Option B (Direct command):
+.\.venv\Scripts\python.exe -m uvicorn api.main:app --host 127.0.0.1 --port 8000
+
+# Launch Streamlit Dashboard:
+# Option A (Windows PowerShell helper):
+.\run_dashboard.ps1
+# Option B (Direct command):
+.\.venv\Scripts\python.exe -m streamlit run dashboard/app.py --server.port 8501
 ```
 
 ---
