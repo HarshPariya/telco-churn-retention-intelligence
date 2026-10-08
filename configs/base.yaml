@@ -1,0 +1,125 @@
+# Base Configuration for Telco Customer Churn & Retention Optimization Platform
+
+project:
+  name: "telco-customer-churn"
+  version: "1.0.0"
+  random_seed: 42
+
+data:
+  raw_path: "data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+  interim_path: "data/interim/telco_churn_cleaned.parquet"
+  processed_path: "data/processed/telco_churn_processed.parquet"
+  train_path: "data/processed/train.parquet"
+  val_path: "data/processed/val.parquet"
+  test_path: "data/processed/test.parquet"
+  id_column: "customerID"
+  target_column: "Churn"
+  positive_class: "Yes"
+  negative_class: "No"
+  
+  # TotalCharges blank string fix
+  numeric_coercion_columns:
+    - "TotalCharges"
+
+  # Service columns containing "No internet service" pseudo-category to collapse into "No"
+  internet_service_sub_features:
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+
+  # Service columns containing "No phone service" pseudo-category to collapse into "No"
+  phone_service_sub_features:
+    - "MultipleLines"
+
+  all_service_features:
+    - "PhoneService"
+    - "MultipleLines"
+    - "InternetService"
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+
+split:
+  test_size: 0.20
+  val_size: 0.20
+  stratify: true
+  random_state: 42
+
+features:
+  tenure_bucket_bins: [0, 12, 24, 48, 60, 72]
+  tenure_bucket_labels: ["0-12m", "12-24m", "24-48m", "48-60m", "60-72m"]
+  
+  categorical_features:
+    - "gender"
+    - "SeniorCitizen"
+    - "Partner"
+    - "Dependents"
+    - "PhoneService"
+    - "MultipleLines"
+    - "InternetService"
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+    - "Contract"
+    - "PaperlessBilling"
+    - "PaymentMethod"
+    - "tenure_bucket"
+
+  numeric_features:
+    - "tenure"
+    - "MonthlyCharges"
+    - "TotalCharges"
+    - "avg_monthly_spend"
+    - "services_count"
+    - "monthly_to_total_ratio"
+    - "contract_monthly_risk"
+
+modeling:
+  models_to_evaluate:
+    - "logistic_regression"
+    - "random_forest"
+    - "xgboost"
+    - "lightgbm"
+  cv_folds: 5
+  primary_metric: "roc_auc"
+  decision_metric: "f1"
+
+business:
+  retention_offer_cost: 35.0          # Campaign offer cost ($) for contacted customers
+  churn_loss_factor: 1.0              # Multiplier on lost CLV if a customer churns without contact
+  usd_to_inr_rate: 83.5               # Configurable business conversion rate to INR
+  risk_bands:
+    critical: 0.70
+    high: 0.50
+    medium: 0.30
+
+artifacts:
+  model_dir: "models"
+  model_file: "models/production_pipeline.joblib"
+  metadata_file: "models/metadata.json"
+  shap_explainer_file: "models/shap_explainer.joblib"
+  figures_dir: "reports/figures"
+  tables_dir: "reports/tables"
+
+mlflow:
+  tracking_uri: "sqlite:///mlruns.db"
+  experiment_name: "telco-customer-churn"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  title: "Telco Churn & Retention Optimization Platform API"
+  version: "1.0.0"
+
+dashboard:
+  port: 8501
+  title: "Telco Retention Intelligence Dashboard"

@@ -1,0 +1,40 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    mkdir -p /app/data /app/models /app/reports /app/configs /app/dashboard && \
+    chown -R appuser:appuser /app
+
+# Copy application source code and resources
+COPY --chown=appuser:appuser src/ ./src/
+COPY --chown=appuser:appuser dashboard/ ./dashboard/
+COPY --chown=appuser:appuser configs/ ./configs/
+COPY --chown=appuser:appuser models/ ./models/
+COPY --chown=appuser:appuser reports/ ./reports/
+COPY --chown=appuser:appuser data/ ./data/
+
+USER appuser
+
+EXPOSE 8501
+
+HEALTHCHECK --interval=20s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+
+CMD ["streamlit", "run", "dashboard/app.py", "--server.port", "8501", "--server.address", "0.0.0.0", "--server.headless", "true"]

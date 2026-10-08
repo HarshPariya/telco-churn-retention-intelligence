@@ -1,0 +1,36 @@
+name: Continuous Deployment (CD) - Deployment Ready
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+  deploy-readiness:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log Deployment Status
+      run: |
+        echo "=========================================================="
+        echo "Continuous Deployment Pipeline Triggered"
+        echo "Target Platforms: Render / Railway / Hugging Face Spaces"
+        echo "Status: Deployment-ready (Awaiting cloud secret injection)"
+        echo "=========================================================="
+
+    # In production with cloud provider credentials configured:
+    # - name: Push Docker Image to Container Registry
+    #   run: |
+    #     echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+    #     docker tag telco-churn-api:latest ${{ secrets.DOCKER_REPO }}/telco-api:${{ github.sha }}
+    #     docker push ${{ secrets.DOCKER_REPO }}/telco-api:${{ github.sha }}
+    #
+    # - name: Trigger Deployment Webhook
+    #   run: |
+    #     curl -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}"

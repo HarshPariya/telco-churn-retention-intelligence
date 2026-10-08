@@ -1,0 +1,10 @@
+# Development Configuration
+_base_: "configs/base.yaml"
+
+app_env: "development"
+logging:
+  level: "DEBUG"
+
+mlflow:
+  tracking_uri: "sqlite:///mlruns.db"
+  experiment_name: "telco-customer-churn-dev"

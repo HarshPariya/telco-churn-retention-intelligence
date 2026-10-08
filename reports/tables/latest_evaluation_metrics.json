@@ -1,0 +1,26 @@
+{
+  "threshold": 0.23,
+  "accuracy": 0.626,
+  "precision": 0.4105,
+  "recall": 0.9385,
+  "f1": 0.5712,
+  "roc_auc": 0.8439,
+  "pr_auc": 0.6582,
+  "brier_score": 0.1631,
+  "true_positives": 351,
+  "false_positives": 504,
+  "true_negatives": 531,
+  "false_negatives": 23,
+  "confusion_matrix": [
+    [
+      531,
+      504
+    ],
+    [
+      23,
+      351
+    ]
+  ],
+  "confusion_matrix_plot": "D:\\Internship Project\\reports\\figures\\evaluation_holdout_confusion_matrix.png",
+  "roc_pr_plot": "D:\\Internship Project\\reports\\figures\\evaluation_holdout_roc_pr_curves.png"
+}

@@ -1,0 +1,5 @@
+model_type,class_weighting,cv_roc_auc_mean,cv_roc_auc_std,cv_f1_mean,cv_f1_std,val_threshold,val_accuracy,val_precision,val_recall,val_f1,val_roc_auc,val_pr_auc,val_brier_score,val_true_positives,val_false_positives,val_true_negatives,val_false_negatives
+logistic_regression,True,0.844,0.0095,0.6315,0.0068,0.5,0.7462,0.5142,0.7893,0.6227,0.8485,0.672,0.1621,236,223,605,63
+random_forest,True,0.8452,0.0087,0.6333,0.0121,0.5,0.7675,0.5433,0.7759,0.6391,0.8485,0.6583,0.1522,232,195,633,67
+xgboost,True,0.8424,0.0093,0.6271,0.0131,0.5,0.7542,0.5249,0.7759,0.6262,0.8503,0.6662,0.1563,232,210,618,67
+lightgbm,True,0.8343,0.012,0.6217,0.0162,0.5,0.7516,0.5213,0.7759,0.6237,0.8448,0.6583,0.1574,232,213,615,67
