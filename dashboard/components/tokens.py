@@ -6,8 +6,6 @@ used across the Telco Retention Intelligence platform.
 
 from typing import Dict
 
-import streamlit as st
-
 # Neutral & Surface Tokens
 COLOR_PAGE_BG = "#F5F0E7"         # Warm Ivory
 COLOR_PRIMARY_SURFACE = "#FFFDF8"  # Cream / Warm White
@@ -21,8 +19,8 @@ COLOR_SECONDARY_TEXT = "#6F675D"  # Muted Warm Charcoal
 COLOR_TERTIARY_TEXT = "#948A7D"   # Disabled / Tertiary Text
 
 # Brand & Accent Tokens
-COLOR_PRIMARY_BRAND = "#5E6B4A"   # Muted Olive / Sage
-COLOR_PRIMARY_BRAND_DARK = "#465238" # Deep Olive (Hover / Active)
+COLOR_PRIMARY_BRAND = "#15803D"   # Clean Enterprise Green
+COLOR_PRIMARY_BRAND_DARK = "#166534" # Deep Green (Hover / Active)
 COLOR_SECONDARY_ACCENT = "#A56B4F" # Restrained Terracotta
 
 # Semantic Risk Tokens
@@ -65,9 +63,3 @@ RISK_BADGE_CONFIG: Dict[str, Dict[str, str]] = {
 
 # Standard Typography Stack
 FONT_FAMILY = 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-
-
-def render_clean_html(html: str) -> None:
-    """Render HTML in Streamlit cleanly without indentation or stray code-block leaks."""
-    cleaned = "".join(line.strip() for line in html.splitlines() if line.strip())
-    st.markdown(cleaned, unsafe_allow_html=True)

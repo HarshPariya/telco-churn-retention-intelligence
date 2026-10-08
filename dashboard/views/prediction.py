@@ -16,7 +16,6 @@ from dashboard.components.tokens import (
     COLOR_PRIMARY_TEXT,
     COLOR_SECONDARY_TEXT,
     FONT_FAMILY,
-    render_clean_html,
 )
 from src.telco_churn.inference.predictor import (
     CustomerPredictionRequest,
@@ -25,7 +24,7 @@ from src.telco_churn.inference.predictor import (
 
 
 def render_customer_prediction() -> None:
-    render_clean_html(
+    st.markdown(
         f"""
         <div style="margin-bottom: 20px;">
             <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
@@ -35,20 +34,34 @@ def render_customer_prediction() -> None:
                 Estimate churn risk for an individual customer and understand which factors influence the prediction.
             </p>
         </div>
-        """
+        """,
+        unsafe_allow_html=True,
     )
 
     # Compact 3-Step Workflow Banner
-    render_clean_html(
+    st.markdown(
         f"""
-        <div style="background: {COLOR_PRIMARY_SURFACE}; border: 1px solid {COLOR_BORDER}; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: {COLOR_SECONDARY_TEXT}; font-family: {FONT_FAMILY};">
+        <div style="
+            background: {COLOR_PRIMARY_SURFACE};
+            border: 1px solid {COLOR_BORDER};
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: {COLOR_SECONDARY_TEXT};
+            font-family: {FONT_FAMILY};
+        ">
             <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">1.</span> Enter customer details</div>
             <div style="color: {COLOR_BORDER};">→</div>
             <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">2.</span> Run prediction</div>
             <div style="color: {COLOR_BORDER};">→</div>
             <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">3.</span> Review risk and contributing factors</div>
         </div>
-        """
+        """,
+        unsafe_allow_html=True,
     )
 
     try:
@@ -63,8 +76,9 @@ def render_customer_prediction() -> None:
 
     with col_input:
         with st.form("customer_prediction_form"):
-            render_clean_html(
-                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Customer Profile</div>"
+            st.markdown(
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Customer Profile</div>",
+                unsafe_allow_html=True,
             )
             customer_id = st.text_input(
                 "Customer ID",
@@ -84,8 +98,9 @@ def render_customer_prediction() -> None:
                 partner = st.selectbox("Partner", options=["No", "Yes"])
                 dependents = st.selectbox("Dependents", options=["No", "Yes"])
 
-            render_clean_html(
-                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Account & Billing</div>"
+            st.markdown(
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Account & Billing</div>",
+                unsafe_allow_html=True,
             )
             a1, a2 = st.columns(2)
             with a1:
@@ -129,8 +144,9 @@ def render_customer_prediction() -> None:
                     step=10.0,
                 )
 
-            render_clean_html(
-                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Subscribed Services</div>"
+            st.markdown(
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Subscribed Services</div>",
+                unsafe_allow_html=True,
             )
             s1, s2, s3 = st.columns(3)
             with s1:
@@ -146,12 +162,13 @@ def render_customer_prediction() -> None:
                 tv = st.selectbox("Streaming TV", options=["Yes", "No", "No internet service"], index=0)
                 movies = st.selectbox("Streaming Movies", options=["Yes", "No", "No internet service"], index=0)
 
-            render_clean_html("<div style='height: 8px;'></div>")
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
             st.form_submit_button("Predict Churn Risk", width="stretch")
 
     with col_result:
-        render_clean_html(
-            f"<div style='font-size: 1.05rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Model Assessment</div>"
+        st.markdown(
+            f"<div style='font-size: 1.05rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Model Assessment</div>",
+            unsafe_allow_html=True,
         )
 
         req = CustomerPredictionRequest(
@@ -204,11 +221,13 @@ def render_customer_prediction() -> None:
             )
 
         # Contributing Factors Section
-        render_clean_html(
-            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 2px 0;'>Why this prediction?</div>"
+        st.markdown(
+            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 2px 0;'>Why this prediction?</div>",
+            unsafe_allow_html=True,
         )
-        render_clean_html(
-            f"<div style='font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 10px;'>Top factors influencing this customer's predicted risk:</div>"
+        st.markdown(
+            f"<div style='font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 10px;'>Top factors influencing this customer's predicted risk:</div>",
+            unsafe_allow_html=True,
         )
 
         for idx, driver in enumerate(res.top_drivers, start=1):
@@ -229,8 +248,9 @@ def render_customer_prediction() -> None:
             )
 
         # Neutral Suggested Review
-        render_clean_html(
-            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 4px 0;'>Suggested Review</div>"
+        st.markdown(
+            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 4px 0;'>Suggested Review</div>",
+            unsafe_allow_html=True,
         )
         if res.risk_level in ["CRITICAL", "HIGH"]:
             if contract == "Month-to-month":
