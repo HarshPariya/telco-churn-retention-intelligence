@@ -1,26 +1,35 @@
-"""Interactive Plotly chart components configured for enterprise light theme."""
+"""Interactive Plotly chart components configured for warm light enterprise visual system."""
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Design System Palette Tokens
-TEXT_PRIMARY = "#172033"
-TEXT_SECONDARY = "#5B6577"
-GRID_COLOR = "#E2E8F0"
+from dashboard.components.tokens import (
+    COLOR_BORDER,
+    COLOR_PRIMARY_BRAND,
+    COLOR_PRIMARY_TEXT,
+    COLOR_RISK_CRITICAL,
+    COLOR_RISK_HIGH,
+    COLOR_RISK_LOW,
+    COLOR_RISK_MEDIUM,
+    COLOR_SECONDARY_TEXT,
+    FONT_FAMILY,
+)
+
+# Semantic Risk Mapping
 RISK_COLORS = {
-    "CRITICAL": "#B91C1C",
-    "HIGH": "#C2410C",
-    "MEDIUM": "#B45309",
-    "LOW": "#15803D",
+    "CRITICAL": COLOR_RISK_CRITICAL,
+    "HIGH": COLOR_RISK_HIGH,
+    "MEDIUM": COLOR_RISK_MEDIUM,
+    "LOW": COLOR_RISK_LOW,
 }
 
 
 def plot_risk_distribution(counts_dict: dict) -> go.Figure:
-    """Plot risk category distribution donut chart with clean light styling."""
+    """Plot risk category distribution donut chart with warm enterprise styling."""
     labels = list(counts_dict.keys())
     values = list(counts_dict.values())
-    color_seq = [RISK_COLORS.get(lvl, "#64748B") for lvl in labels]
+    color_seq = [RISK_COLORS.get(lvl, "#948A7D") for lvl in labels]
 
     fig = go.Figure(
         data=[
@@ -28,17 +37,17 @@ def plot_risk_distribution(counts_dict: dict) -> go.Figure:
                 labels=labels,
                 values=values,
                 hole=0.55,
-                marker={"colors": color_seq, "line": {"color": "#FFFFFF", "width": 2}},
+                marker={"colors": color_seq, "line": {"color": "#FFFDF8", "width": 2}},
                 textinfo="label+percent",
                 hoverinfo="label+value+percent",
-                textfont={"color": "#FFFFFF", "size": 12},
+                textfont={"color": "#FFFDF8", "size": 12, "family": FONT_FAMILY},
             )
         ]
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": TEXT_PRIMARY, "family": "Inter, sans-serif"},
+        font={"color": COLOR_PRIMARY_TEXT, "family": FONT_FAMILY},
         margin={"t": 16, "b": 16, "l": 16, "r": 16},
         showlegend=False,
     )
@@ -46,12 +55,21 @@ def plot_risk_distribution(counts_dict: dict) -> go.Figure:
 
 
 def plot_churn_by_contract(df: pd.DataFrame) -> go.Figure:
-    """Bar chart comparing observed churn rate across contract types."""
+    """Bar chart comparing observed churn rate across contract types with warm olive/terracotta emphasis."""
     if "Contract" not in df.columns or "Churn" not in df.columns:
         return go.Figure()
 
     churn_by_contract = df.groupby("Contract")["Churn"].mean().reset_index()
     churn_by_contract["ChurnRatePct"] = churn_by_contract["Churn"] * 100
+
+    # Sort so Month-to-month comes first
+    contract_order = ["Month-to-month", "One year", "Two year"]
+    churn_by_contract["sort_order"] = churn_by_contract["Contract"].apply(
+        lambda x: contract_order.index(x) if x in contract_order else 99
+    )
+    churn_by_contract = churn_by_contract.sort_values("sort_order")
+
+    colors = [COLOR_RISK_HIGH, COLOR_PRIMARY_BRAND, COLOR_RISK_LOW]
 
     fig = px.bar(
         churn_by_contract,
@@ -59,37 +77,36 @@ def plot_churn_by_contract(df: pd.DataFrame) -> go.Figure:
         y="ChurnRatePct",
         text_auto=".1f",
         labels={"ChurnRatePct": "Observed Churn (%)", "Contract": "Contract Type"},
-        color_discrete_sequence=["#2563EB"],
     )
     fig.update_traces(
-        marker_color="#2563EB",
-        marker_line_color="#1D4ED8",
+        marker_color=colors[: len(churn_by_contract)],
+        marker_line_color=COLOR_BORDER,
         marker_line_width=1,
-        textfont={"color": "#FFFFFF", "size": 13, "family": "Inter, sans-serif"},
+        textfont={"color": "#FFFDF8", "size": 12, "family": FONT_FAMILY},
         textposition="inside",
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": TEXT_PRIMARY, "family": "Inter, sans-serif"},
+        font={"color": COLOR_PRIMARY_TEXT, "family": FONT_FAMILY},
         xaxis={
             "showgrid": False,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_PRIMARY, "size": 12},
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_PRIMARY_TEXT, "size": 12, "family": FONT_FAMILY},
         },
         yaxis={
             "showgrid": True,
-            "gridcolor": GRID_COLOR,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_SECONDARY, "size": 12},
+            "gridcolor": COLOR_BORDER,
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
         },
-        margin={"t": 24, "b": 16, "l": 16, "r": 16},
+        margin={"t": 20, "b": 16, "l": 16, "r": 16},
     )
     return fig
 
 
 def plot_churn_by_tenure_bucket(df: pd.DataFrame) -> go.Figure:
-    """Bar chart of observed churn across tenure cohorts."""
+    """Bar chart of observed churn across tenure cohorts using a restrained warm tonal progression."""
     if "tenure" not in df.columns or "Churn" not in df.columns:
         return go.Figure()
 
@@ -106,37 +123,36 @@ def plot_churn_by_tenure_bucket(df: pd.DataFrame) -> go.Figure:
         y="ChurnRatePct",
         text_auto=".1f",
         labels={"ChurnRatePct": "Observed Churn (%)", "tenure_bucket": "Tenure Cohort"},
-        color_discrete_sequence=["#3B82F6"],
     )
     fig.update_traces(
-        marker_color="#3B82F6",
-        marker_line_color="#2563EB",
+        marker_color=COLOR_PRIMARY_BRAND,
+        marker_line_color=COLOR_BORDER,
         marker_line_width=1,
-        textfont={"color": "#FFFFFF", "size": 13, "family": "Inter, sans-serif"},
+        textfont={"color": "#FFFDF8", "size": 12, "family": FONT_FAMILY},
         textposition="inside",
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": TEXT_PRIMARY, "family": "Inter, sans-serif"},
+        font={"color": COLOR_PRIMARY_TEXT, "family": FONT_FAMILY},
         xaxis={
             "showgrid": False,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_PRIMARY, "size": 12},
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_PRIMARY_TEXT, "size": 12, "family": FONT_FAMILY},
         },
         yaxis={
             "showgrid": True,
-            "gridcolor": GRID_COLOR,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_SECONDARY, "size": 12},
+            "gridcolor": COLOR_BORDER,
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
         },
-        margin={"t": 24, "b": 16, "l": 16, "r": 16},
+        margin={"t": 20, "b": 16, "l": 16, "r": 16},
     )
     return fig
 
 
 def plot_priority_scatter(df_results: pd.DataFrame) -> go.Figure:
-    """Scatter plot: Churn Probability vs Customer Lifetime Value sized by Priority Score."""
+    """Scatter plot: Churn Probability vs Customer Lifetime Value sized by Priority Score in warm palette."""
     fig = px.scatter(
         df_results,
         x="churn_probability",
@@ -154,25 +170,25 @@ def plot_priority_scatter(df_results: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font={"color": TEXT_PRIMARY, "family": "Inter, sans-serif"},
+        font={"color": COLOR_PRIMARY_TEXT, "family": FONT_FAMILY},
         xaxis={
             "showgrid": True,
-            "gridcolor": GRID_COLOR,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_SECONDARY, "size": 12},
+            "gridcolor": COLOR_BORDER,
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
             "tickformat": ".0%",
         },
         yaxis={
             "showgrid": True,
-            "gridcolor": GRID_COLOR,
-            "title": {"font": {"color": TEXT_SECONDARY, "size": 13}},
-            "tickfont": {"color": TEXT_SECONDARY, "size": 12},
+            "gridcolor": COLOR_BORDER,
+            "title": {"font": {"color": COLOR_SECONDARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "tickfont": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
             "tickprefix": "$",
         },
         margin={"t": 16, "b": 16, "l": 16, "r": 16},
         legend={
-            "title": {"text": "Risk Level", "font": {"color": TEXT_PRIMARY, "size": 12}},
-            "font": {"color": TEXT_SECONDARY, "size": 11},
+            "title": {"text": "Risk Level", "font": {"color": COLOR_PRIMARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "font": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
         },
     )
     return fig

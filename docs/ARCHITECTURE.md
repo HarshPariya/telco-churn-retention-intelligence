@@ -104,7 +104,8 @@
 ### 2.3 Analytics Frontend (`dashboard/`)
 
 - Streamlit application tailored for business executives and frontline retention teams.
-- Modular architecture with clean component separation (`components/`, `pages/`).
+- Modular architecture with clean component separation (`components/`, `views/`) and a warm light enterprise visual system (`#F5F0E7` ivory background, `#FFFDF8` cream surfaces, `#2D2924` espresso typography, `#5E6B4A` olive brand, `#A56B4F` terracotta accents).
+- Strictly single entrypoint routing via `dashboard/app.py` with zero competing page discovery routes or dark theme toggles.
 
 ---
 

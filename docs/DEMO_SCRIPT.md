@@ -16,36 +16,36 @@
 
 ### [01:30 - 03:00] Phase 2: Executive Overview Dashboard
 
-- **Screen:** Open Streamlit Dashboard (`http://localhost:8501`) on **Executive Overview**.
+- **Screen:** Open Streamlit Dashboard (`http://localhost:8501`) on **Customer Retention Overview**.
 - **Demonstration:**
-  - Highlight Portfolio KPIs: 7,043 analyzed California subscribers, 26.5% baseline churn rate, \$64.76 average monthly billing, and \$16.0M portfolio CLV.
-  - Explain the **CFO ROI Model**: A blanket 15% discount across all customers costs over \$205,000 quarterly, whereas a targeted retention campaign focusing on the top-decile risk cohort (\$35 offer) costs only \$24,640—saving **over 80% in promotional capital** while preserving high-CLV accounts.
-  - Point to the **Contract Comparison Chart**: Month-to-month contracts churn at 42.7%, while 2-year contracts churn at only 2.8%.
+  - Highlight Portfolio KPIs: 7,043 analyzed California subscribers, 26.5% baseline churn rate, $64.76 average monthly billing, and portfolio CLV.
+  - Explain the **Illustrative Economics Scenario**: A blanket 15% discount across all customers costs over $205,000 quarterly, whereas a targeted retention campaign focusing on the top-decile risk cohort ($35 offer) costs only $24,640—illustrating the potential efficiency of targeted outreach.
+  - Point to the **Contract Comparison Chart**: Month-to-month contracts show an observed churn rate of 42.7%, while 2-year contracts show 2.8%.
 
 ### [03:00 - 05:00] Phase 3: Single Customer Diagnostic & SHAP Explainability
 
 - **Screen:** Navigate to **Customer Prediction** tab.
 - **Demonstration:**
-  - Enter a sample high-risk profile: Month-to-month contract, tenure = 4 months, fiber optic broadband, electronic check payment, monthly charges = \$85.00.
-  - Click **⚡ Evaluate Churn Risk & Explain**.
+  - Enter a sample high-risk profile: Month-to-month contract, tenure = 4 months, fiber optic broadband, electronic check payment, monthly charges = $79.85.
+  - Click **Predict Churn Risk**.
   - Review Output:
-    - **Risk Badge:** `CRITICAL CHURN RISK` (~82% Churn Propensity).
-    - **Financials:** CLV = \$340.00 (₹28,390), Retention Priority Score = 278.8.
-    - **Top 3 SHAP Drivers:**
-      1. `Month-to-Month Contract` (🔺 Escalates Risk)
-      2. `Account Tenure (4 months)` (🔺 Low loyalty hazard)
-      3. `Electronic Check Payment` (🔺 Payment friction)
-    - **Prescriptive Retention Action:** Recommend targeted 1-year contract discount and tech support onboarding.
+    - **Risk Badge:** `HIGH RISK` / `CRITICAL RISK` with soft warm background.
+    - **Financials:** Customer Lifetime Value (CLV) and Retention Priority Score.
+    - **Top 3 Drivers:**
+      1. `Month-to-month contract` (Increases predicted risk)
+      2. `Account tenure` (Increases predicted risk)
+      3. `Electronic check payment` (Increases predicted risk)
+    - **Suggested Review:** Neutral workflow recommendation for retention specialist review before contacting subscriber.
 
 ### [05:00 - 06:30] Phase 4: Retention Prioritization Engine (Cohort Bulk Scoring)
 
 - **Screen:** Navigate to **Retention Prioritization** tab.
 - **Demonstration:**
-  - Click **Load Pre-Loaded Holdout Cohort (300 Customers)** or upload custom CSV.
-  - Watch real-time batch inference and Tree-SHAP driver extraction.
-  - Inspect the **Ranked Call List**: Accounts sorted descending by Priority Score.
-  - Show the **Priority Bubble Chart**: Explaining that a customer with 50% churn risk and \$4,000 CLV is ranked much higher than a customer with 90% churn risk and \$100 CLV.
-  - Demonstrate CSV export download for frontline retention call centers.
+  - Click **Load Sample Cohort (300 Customers)** or upload custom CSV.
+  - Watch real-time batch inference and driver extraction.
+  - Inspect the **Ranked Retention Queue**: Accounts sorted descending by Retention Priority score ($P(\text{Churn}) \times \text{CLV}$).
+  - Show the **Priority Bubble Chart**: Explaining that a customer with moderate churn risk and high CLV is prioritized higher than a customer with high churn risk but negligible tenure/CLV.
+  - Demonstrate CSV export download for frontline retention teams.
 
 ### [06:30 - 07:30] Phase 5: Model Governance & Holdout Insights
 

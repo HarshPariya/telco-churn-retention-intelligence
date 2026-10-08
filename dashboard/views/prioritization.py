@@ -1,4 +1,7 @@
-"""Retention Prioritization view: Customer cohort ranking, filtering, and export."""
+"""Retention Prioritization view: Customer cohort ranking, filtering, and export.
+
+Engineered with a warm light enterprise visual system.
+"""
 
 import io
 
@@ -7,6 +10,14 @@ import streamlit as st
 
 from dashboard.components.cards import render_empty_state, render_metric_card
 from dashboard.components.charts import plot_priority_scatter, plot_risk_distribution
+from dashboard.components.tokens import (
+    COLOR_BORDER,
+    COLOR_PRIMARY_BRAND,
+    COLOR_PRIMARY_SURFACE,
+    COLOR_PRIMARY_TEXT,
+    COLOR_SECONDARY_TEXT,
+    FONT_FAMILY,
+)
 from src.telco_churn.config import PROJECT_ROOT, load_config
 from src.telco_churn.inference.predictor import get_predictor
 
@@ -15,39 +26,40 @@ def render_retention_prioritization() -> None:
     config = load_config()
 
     st.markdown(
-        """
+        f"""
         <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 1.65rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
                 Retention Prioritization
             </h1>
-            <p style="color: #5B6577; font-size: 0.95rem; margin-bottom: 12px;">
-                Rank customers by predicted churn risk and customer value to focus retention effort where it matters most.
+            <p style="color: {COLOR_SECONDARY_TEXT}; font-size: 0.95rem; margin-bottom: 12px; font-family: {FONT_FAMILY};">
+                Rank customers by predicted churn risk and customer value so retention teams can focus their effort where it matters most.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Methodology Card
+    # Restrained Methodology Card
     st.markdown(
-        """
+        f"""
         <div style="
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: {COLOR_PRIMARY_SURFACE};
+            border: 1px solid {COLOR_BORDER};
             border-radius: 8px;
             padding: 12px 18px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            font-family: {FONT_FAMILY};
         ">
             <div>
-                <span style="font-size: 0.72rem; color: #2563EB; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Prioritization Logic</span>
-                <div style="font-size: 1.0rem; font-weight: 700; color: #172033; margin-top: 2px;">
+                <span style="font-size: 0.70rem; color: {COLOR_PRIMARY_BRAND}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Prioritization Logic</span>
+                <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 2px;">
                     Retention Priority = Churn Probability × Customer Lifetime Value (CLV)
                 </div>
             </div>
-            <div style="font-size: 0.82rem; color: #5B6577; text-align: right;">
+            <div style="font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; text-align: right;">
                 <b>CLV Definition:</b> Monthly Charges × Tenure
             </div>
         </div>
@@ -69,7 +81,7 @@ def render_retention_prioritization() -> None:
         uploaded_file = st.file_uploader(
             "Upload customer CSV file",
             type=["csv"],
-            help="Supported file format: CSV containing customer demographic, account, and subscribed service columns.",
+            help="Supported format: CSV with standard customer demographic, account, and service attributes.",
         )
     with col_sample:
         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
@@ -102,7 +114,7 @@ def render_retention_prioritization() -> None:
     if df_to_process is None:
         render_empty_state(
             message="No customer cohort has been loaded yet.",
-            subtext="Upload a CSV file or click 'Load Sample Cohort' to evaluate customer retention priorities.",
+            subtext="Upload a CSV file or click 'Load Sample Cohort' to begin prioritization.",
         )
         return
 
@@ -144,54 +156,62 @@ def render_retention_prioritization() -> None:
     total_at_risk_clv = float(results_df[results_df["Risk"].isin(["CRITICAL", "HIGH"])]["CLV"].sum())
     highest_priority_id = results_df.iloc[0]["Customer ID"] if not results_df.empty else "N/A"
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        render_metric_card("Customers Evaluated", f"{total_evaluated:,}", "Cohort volume", "blue")
+        render_metric_card("Customers Evaluated", f"{total_evaluated:,}", "Cohort volume", color_class="olive")
     with k2:
-        render_metric_card("Critical / High Risk", f"{high_risk_count:,}", "Requires active review", "rose")
+        render_metric_card("Critical / High Risk", f"{high_risk_count:,}", "Requires active review", color_class="terracotta")
     with k3:
         render_metric_card(
             "At-Risk Customer Value",
             f"${total_at_risk_clv:,.0f}",
             "Cumulative exposed CLV",
-            "amber",
+            color_class="ochre",
         )
     with k4:
         render_metric_card(
             "Highest Priority Account",
             str(highest_priority_id),
-            "Top ranking retention review",
-            "emerald",
+            "Top ranking review",
+            color_class="sage",
         )
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-
     # Charts Grid
+    st.markdown(
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 24px 0 4px 0; font-family: {FONT_FAMILY};">
+            Cohort breakdown & priority matrix
+        </div>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 16px;"></div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     c_left, c_right = st.columns([1, 1.4])
     with c_left:
         st.markdown(
-            """
-            <div style="font-size: 1.0rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+            f"""
+            <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 2px;">
                 Cohort Risk Distribution
             </div>
-            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
-                Breakdown of accounts across risk levels.
+            <div style="font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 8px;">
+                Breakdown of accounts across calibrated risk levels.
             </div>
             """,
             unsafe_allow_html=True,
         )
         risk_counts = results_df["Risk"].value_counts().to_dict()
         fig_donut = plot_risk_distribution(risk_counts)
-        st.plotly_chart(fig_donut, width="stretch")
+        st.plotly_chart(fig_donut, width="stretch", config={"displayModeBar": False})
 
     with c_right:
         st.markdown(
-            """
-            <div style="font-size: 1.0rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
+            f"""
+            <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 2px;">
                 Retention Priority Matrix
             </div>
-            <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 8px;">
+            <div style="font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 8px;">
                 Bubble size reflects overall Retention Priority (Probability × CLV).
             </div>
             """,
@@ -207,19 +227,15 @@ def render_retention_prioritization() -> None:
             }
         )
         fig_scatter = plot_priority_scatter(scatter_df)
-        st.plotly_chart(fig_scatter, width="stretch")
-
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+        st.plotly_chart(fig_scatter, width="stretch", config={"displayModeBar": False})
 
     # Filterable Queue Table
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 2px;">
-            Ranked Retention Queue
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
+            Ranked retention queue
         </div>
-        <div style="font-size: 0.82rem; color: #5B6577; margin-bottom: 12px;">
-            Customers sorted descending by Retention Priority score:
-        </div>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 12px;"></div>
         """,
         unsafe_allow_html=True,
     )
@@ -284,11 +300,11 @@ def render_retention_prioritization() -> None:
         height=380,
     )
 
-    # Download action
+    # Download Action
     csv_buffer = io.StringIO()
     filtered_df.to_csv(csv_buffer, index=False)
     st.download_button(
-        label="Download Results (CSV)",
+        label="Download Prioritized CSV",
         data=csv_buffer.getvalue(),
         file_name="prioritized_customer_retention_queue.csv",
         mime="text/csv",

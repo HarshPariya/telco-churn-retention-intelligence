@@ -1,6 +1,28 @@
-"""Reusable enterprise UI card and badge components with light theme styling."""
+"""Reusable enterprise UI card, badge, and empty state components.
+
+Engineered with a warm light enterprise visual system:
+Ivory/Cream surfaces, dark espresso typography, warm neutral borders,
+and semantic muted olive / terracotta / ochre accents.
+"""
+
+from typing import Optional
 
 import streamlit as st
+
+from dashboard.components.tokens import (
+    COLOR_BORDER,
+    COLOR_PRIMARY_BRAND,
+    COLOR_PRIMARY_SURFACE,
+    COLOR_PRIMARY_TEXT,
+    COLOR_RISK_CRITICAL,
+    COLOR_RISK_HIGH,
+    COLOR_RISK_LOW,
+    COLOR_RISK_MEDIUM,
+    COLOR_SECONDARY_ACCENT,
+    COLOR_SECONDARY_TEXT,
+    COLOR_TERTIARY_TEXT,
+    RISK_BADGE_CONFIG,
+)
 
 
 def render_metric_card(
@@ -8,35 +30,46 @@ def render_metric_card(
     value: str,
     subtext: str = "",
     trend: str = "neutral",
-    color_class: str = "blue",
+    color_class: str = "olive",
+    accent_bar: bool = True,
 ) -> None:
-    """Render a clean enterprise KPI card with light styling."""
+    """Render a clean, warm enterprise KPI card."""
     accent_map = {
-        "blue": "#2563EB",
-        "indigo": "#4F46E5",
-        "rose": "#B91C1C",
-        "emerald": "#15803D",
-        "amber": "#B45309",
+        "olive": COLOR_PRIMARY_BRAND,
+        "terracotta": COLOR_SECONDARY_ACCENT,
+        "sage": COLOR_RISK_LOW,
+        "ochre": COLOR_RISK_MEDIUM,
+        "high": COLOR_RISK_HIGH,
+        "critical": COLOR_RISK_CRITICAL,
+        # Backward-compat aliases mapped to warm enterprise palette
+        "blue": COLOR_PRIMARY_BRAND,
+        "indigo": COLOR_PRIMARY_BRAND,
+        "rose": COLOR_RISK_CRITICAL,
+        "emerald": COLOR_RISK_LOW,
+        "amber": COLOR_RISK_MEDIUM,
     }
-    accent_color = accent_map.get(color_class, "#2563EB")
+    accent_color = accent_map.get(color_class, COLOR_PRIMARY_BRAND)
+
+    border_top_css = f"border-top: 3px solid {accent_color};" if accent_bar else ""
 
     html = f"""
     <div style="
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 16px 18px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        background: {COLOR_PRIMARY_SURFACE};
+        border: 1px solid {COLOR_BORDER};
+        {border_top_css}
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 3px 12px rgba(45, 41, 36, 0.04);
         margin-bottom: 12px;
+        min-height: 105px;
     ">
-        <div style="font-size: 0.76rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+        <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
             {title}
         </div>
-        <div style="font-size: 1.85rem; font-weight: 700; color: #172033; margin: 4px 0 6px 0; line-height: 1.2;">
+        <div style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 3px 0 4px 0; line-height: 1.2;">
             {value}
         </div>
-        <div style="font-size: 0.80rem; color: #5B6577; display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: {accent_color};"></span>
+        <div style="font-size: 0.78rem; color: {COLOR_SECONDARY_TEXT};">
             {subtext}
         </div>
     </div>
@@ -44,75 +77,66 @@ def render_metric_card(
     st.markdown(html, unsafe_allow_html=True)
 
 
-def render_risk_badge(risk_level: str, probability: float) -> None:
-    """Render a clear, accessible risk tier banner with explicit text and probability."""
-    badge_styles = {
-        "CRITICAL": {
-            "bg": "#FEF2F2",
-            "border": "#FCA5A5",
-            "text": "#B91C1C",
-            "label": "CRITICAL RISK",
-            "desc": "High probability of service cancellation. Immediate intervention required.",
-        },
-        "HIGH": {
-            "bg": "#FFF7ED",
-            "border": "#FDBA74",
-            "text": "#C2410C",
-            "label": "HIGH RISK",
-            "desc": "Elevated churn risk exceeding operational decision threshold.",
-        },
-        "MEDIUM": {
-            "bg": "#FEFCE8",
-            "border": "#FDE047",
-            "text": "#854D0E",
-            "label": "MEDIUM RISK",
-            "desc": "Moderate churn propensity. Suitable for automated digital nurture.",
-        },
-        "LOW": {
-            "bg": "#F0FDF4",
-            "border": "#86EFAC",
-            "text": "#15803D",
-            "label": "LOW RISK",
-            "desc": "Stable subscriber account. Maintain standard service relationship.",
-        },
-    }
-    style = badge_styles.get(
+def render_risk_badge(risk_level: str, probability: float, clv: Optional[float] = None, priority: Optional[float] = None) -> None:
+    """Render an accessible, soft warm risk tier summary banner."""
+    style = RISK_BADGE_CONFIG.get(
         risk_level,
         {
-            "bg": "#F8FAFC",
-            "border": "#E2E8F0",
-            "text": "#475569",
+            "bg": "#F7F3EC",
+            "border": COLOR_BORDER,
+            "text": COLOR_PRIMARY_TEXT,
             "label": risk_level,
-            "desc": "Estimated churn propensity.",
+            "desc": "Estimated churn assessment.",
         },
     )
+
+    clv_block = ""
+    if clv is not None and priority is not None:
+        clv_block = f"""
+        <div style="border-left: 1px solid {style['border']}; padding-left: 18px; margin-left: 18px;">
+            <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600;">
+                Customer Value (CLV)
+            </div>
+            <div style="font-size: 1.25rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 2px;">
+                ${clv:,.2f}
+            </div>
+            <div style="font-size: 0.74rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 1px;">
+                Priority Score: <b>{priority:,.1f}</b>
+            </div>
+        </div>
+        """
 
     html = f"""
     <div style="
         background: {style['bg']};
         border: 1px solid {style['border']};
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 16px 20px;
         margin-bottom: 18px;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
     ">
-        <div>
-            <div style="font-size: 0.78rem; font-weight: 700; color: {style['text']}; letter-spacing: 0.05em;">
+        <div style="flex: 1; min-width: 200px;">
+            <div style="font-size: 0.80rem; font-weight: 700; color: {style['text']}; letter-spacing: 0.05em;">
                 {style['label']}
             </div>
-            <div style="font-size: 0.84rem; color: #5B6577; margin-top: 2px;">
+            <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 3px;">
                 {style['desc']}
             </div>
         </div>
-        <div style="text-align: right;">
-            <div style="font-size: 2.1rem; font-weight: 800; color: {style['text']}; line-height: 1;">
-                {probability:.1%}
+        <div style="display: flex; align-items: center; text-align: right;">
+            <div>
+                <div style="font-size: 2.1rem; font-weight: 800; color: {style['text']}; line-height: 1;">
+                    {probability:.1%}
+                </div>
+                <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600; margin-top: 3px;">
+                    Estimated Churn Probability
+                </div>
             </div>
-            <div style="font-size: 0.74rem; color: #5B6577; text-transform: uppercase; font-weight: 600; margin-top: 2px;">
-                Estimated Churn Probability
-            </div>
+            {clv_block}
         </div>
     </div>
     """
@@ -120,19 +144,19 @@ def render_risk_badge(risk_level: str, probability: float) -> None:
 
 
 def render_driver_card(feature: str, direction: str, impact: float, rank: int) -> None:
-    """Render a clean card displaying a single contributing risk driver."""
+    """Render a restrained warm card displaying an individual contributing factor."""
     is_risk = direction == "INCREASES_CHURN"
-    border_color = "#B91C1C" if is_risk else "#15803D"
-    badge_bg = "#FEF2F2" if is_risk else "#F0FDF4"
-    badge_text = "#B91C1C" if is_risk else "#15803D"
-    direction_label = "Increases predicted churn risk" if is_risk else "Protects retention (reduces risk)"
+    border_color = COLOR_RISK_HIGH if is_risk else COLOR_RISK_LOW
+    badge_bg = "#FBF2ED" if is_risk else "#F1F5F0"
+    badge_text = "#8A4123" if is_risk else "#3D5440"
+    direction_label = "Increases predicted risk" if is_risk else "Reduces predicted risk"
 
     html = f"""
     <div style="
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        background: {COLOR_PRIMARY_SURFACE};
+        border: 1px solid {COLOR_BORDER};
         border-left: 3px solid {border_color};
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 12px 16px;
         margin-bottom: 8px;
         display: flex;
@@ -140,10 +164,10 @@ def render_driver_card(feature: str, direction: str, impact: float, rank: int) -
         align-items: center;
     ">
         <div>
-            <div style="font-size: 0.72rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+            <div style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
                 Factor #{rank}
             </div>
-            <div style="font-size: 0.95rem; font-weight: 600; color: #172033; margin-top: 1px;">
+            <div style="font-size: 0.94rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
                 {feature}
             </div>
         </div>
@@ -151,7 +175,7 @@ def render_driver_card(feature: str, direction: str, impact: float, rank: int) -
             <span style="
                 background: {badge_bg};
                 color: {badge_text};
-                font-size: 0.76rem;
+                font-size: 0.75rem;
                 font-weight: 600;
                 padding: 3px 8px;
                 border-radius: 4px;
@@ -159,7 +183,7 @@ def render_driver_card(feature: str, direction: str, impact: float, rank: int) -
             ">
                 {direction_label}
             </span>
-            <div style="font-size: 0.72rem; color: #5B6577; margin-top: 3px;">
+            <div style="font-size: 0.72rem; color: {COLOR_TERTIARY_TEXT}; margin-top: 3px;">
                 Relative impact: +{impact:.3f}
             </div>
         </div>
@@ -169,20 +193,20 @@ def render_driver_card(feature: str, direction: str, impact: float, rank: int) -
 
 
 def render_empty_state(message: str, subtext: str = "") -> None:
-    """Render a standard clean empty state container."""
+    """Render a restrained warm empty state container."""
     html = f"""
     <div style="
-        background: #FFFFFF;
-        border: 1px dashed #CBD5E1;
-        border-radius: 8px;
-        padding: 36px 24px;
+        background: {COLOR_PRIMARY_SURFACE};
+        border: 1px dashed {COLOR_BORDER};
+        border-radius: 10px;
+        padding: 32px 24px;
         text-align: center;
         margin: 16px 0;
     ">
-        <div style="font-size: 0.98rem; font-weight: 600; color: #172033;">
+        <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT};">
             {message}
         </div>
-        <div style="font-size: 0.85rem; color: #5B6577; margin-top: 4px;">
+        <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 4px;">
             {subtext}
         </div>
     </div>

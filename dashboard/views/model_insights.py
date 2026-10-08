@@ -1,13 +1,21 @@
 """Model Performance, Governance, and Explainability view.
 
 Provides rigorous evaluation metrics, model benchmarking, global SHAP feature attribution,
-and operational decision threshold governance in a clean enterprise light presentation.
+and operational decision threshold governance in a warm light enterprise visual system.
 """
 
 import pandas as pd
 import streamlit as st
 
 from dashboard.components.cards import render_metric_card
+from dashboard.components.tokens import (
+    COLOR_BORDER,
+    COLOR_PRIMARY_BRAND,
+    COLOR_PRIMARY_SURFACE,
+    COLOR_PRIMARY_TEXT,
+    COLOR_SECONDARY_TEXT,
+    FONT_FAMILY,
+)
 from src.telco_churn.config import PROJECT_ROOT, load_config
 from src.telco_churn.models.registry import load_production_artifact
 
@@ -16,13 +24,13 @@ def render_model_insights() -> None:
     config = load_config()
 
     st.markdown(
-        """
+        f"""
         <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 1.65rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
-                Model Insights
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
+                Model Performance & Explainability
             </h1>
-            <p style="color: #5B6577; font-size: 0.95rem; margin-bottom: 14px;">
-                Review model performance, reliability, and the factors influencing churn predictions.
+            <p style="color: {COLOR_SECONDARY_TEXT}; font-size: 0.95rem; margin-bottom: 14px; font-family: {FONT_FAMILY};">
+                Review how well the model performs, how it compares with alternatives, and which factors most influence predictions.
             </p>
         </div>
         """,
@@ -41,8 +49,8 @@ def render_model_insights() -> None:
     st.markdown(
         f"""
         <div style="
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
+            background: {COLOR_PRIMARY_SURFACE};
+            border: 1px solid {COLOR_BORDER};
             border-radius: 8px;
             padding: 14px 18px;
             margin-bottom: 20px;
@@ -51,28 +59,29 @@ def render_model_insights() -> None:
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            font-family: {FONT_FAMILY};
         ">
             <div>
-                <span style="font-size: 0.72rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Production Model</span>
-                <div style="font-size: 0.96rem; font-weight: 700; color: #172033; margin-top: 1px;">
-                    {metadata.algorithm} <span style="font-size: 0.80rem; font-weight: 500; color: #5B6577;">({metadata.model_version})</span>
+                <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Production Model</span>
+                <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
+                    {metadata.algorithm.split('(')[0].strip()} <span style="font-size: 0.80rem; font-weight: 500; color: {COLOR_SECONDARY_TEXT};">({metadata.model_version})</span>
                 </div>
             </div>
-            <div style="border-left: 1px solid #E2E8F0; padding-left: 14px;">
-                <span style="font-size: 0.72rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Decision Threshold</span>
-                <div style="font-size: 0.96rem; font-weight: 700; color: #2563EB; margin-top: 1px;">
+            <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
+                <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Decision Threshold</span>
+                <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_BRAND}; margin-top: 1px;">
                     τ* = {metadata.optimal_threshold:.2f}
                 </div>
             </div>
-            <div style="border-left: 1px solid #E2E8F0; padding-left: 14px;">
-                <span style="font-size: 0.72rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Training Cohort</span>
-                <div style="font-size: 0.96rem; font-weight: 700; color: #172033; margin-top: 1px;">
+            <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
+                <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Training Cohort</span>
+                <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
                     {ds_info.get('train_rows', 4507):,} customers
                 </div>
             </div>
-            <div style="border-left: 1px solid #E2E8F0; padding-left: 14px;">
-                <span style="font-size: 0.72rem; color: #5B6577; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Holdout Evaluation</span>
-                <div style="font-size: 0.96rem; font-weight: 700; color: #172033; margin-top: 1px;">
+            <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
+                <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Holdout Evaluation</span>
+                <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
                     {ds_info.get('test_rows', 1409):,} customers
                 </div>
             </div>
@@ -83,13 +92,13 @@ def render_model_insights() -> None:
 
     # Core Metrics Row (Measured on Unseen Holdout Test Set)
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172033; margin-bottom: 8px;">
-            Holdout Test Performance Metrics
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 24px 0 4px 0; font-family: {FONT_FAMILY};">
+            Holdout performance metrics
         </div>
-        <p style="color: #5B6577; font-size: 0.85rem; margin-bottom: 12px;">
-            Measured on a strictly segregated 20% holdout test dataset (1,409 customers) never seen during training or tuning.
-        </p>
+        <div style="font-size: 0.82rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 12px;">
+            Measured on a strictly segregated 20% holdout test dataset (1,409 accounts) never seen during training or tuning.
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -97,40 +106,39 @@ def render_model_insights() -> None:
     m1, m2, m3, m4, m5, m6 = st.columns(6)
     with m1:
         render_metric_card(
-            "ROC-AUC", f"{metrics.get('roc_auc', 0.8439):.4f}", "Discriminative Ability", color_class="blue"
+            "ROC-AUC", f"{metrics.get('roc_auc', 0.8439):.4f}", "Discriminative ability", color_class="olive"
         )
     with m2:
         render_metric_card(
-            "PR-AUC", f"{metrics.get('pr_auc', 0.6582):.4f}", "Precision-Recall AUC", color_class="indigo"
+            "PR-AUC", f"{metrics.get('pr_auc', 0.6582):.4f}", "Precision-Recall AUC", color_class="olive"
         )
     with m3:
         render_metric_card(
-            "Recall", f"{metrics.get('recall', 0.9385):.1%}", "Identified Churners", color_class="rose"
+            "Recall", f"{metrics.get('recall', 0.9385):.1%}", "Identified churners", color_class="terracotta"
         )
     with m4:
         render_metric_card(
-            "Precision", f"{metrics.get('precision', 0.4105):.1%}", "Flagged Precision", color_class="amber"
+            "Precision", f"{metrics.get('precision', 0.4105):.1%}", "Flagged precision", color_class="ochre"
         )
     with m5:
         render_metric_card(
-            "F1 Score", f"{metrics.get('f1', 0.5712):.4f}", "Harmonic Mean", color_class="blue"
+            "F1 Score", f"{metrics.get('f1', 0.5712):.4f}", "Harmonic mean", color_class="olive"
         )
     with m6:
         render_metric_card(
-            "Brier Score", f"{metrics.get('brier_score', 0.1631):.4f}", "Calibration (Lower Better)", color_class="emerald"
+            "Brier Score", f"{metrics.get('brier_score', 0.1631):.4f}", "Calibration (lower better)", color_class="sage"
         )
-
-    st.markdown("<hr style='border: none; border-top: 1px solid #E2E8F0; margin: 24px 0;' />", unsafe_allow_html=True)
 
     # Multi-Model Benchmark Comparison Table
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
-            Model Benchmarking & Selection Comparison
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
+            Model benchmark comparison
         </div>
-        <p style="color: #5B6577; font-size: 0.85rem; margin-bottom: 12px;">
-            Rigorous 5-fold stratified cross-validation on the training cohort compared alongside final unseen holdout test performance:
-        </p>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 12px;"></div>
+        <div style="font-size: 0.82rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 12px;">
+            5-fold stratified cross-validation on training cohort alongside final holdout test results:
+        </div>
         """,
         unsafe_allow_html=True,
     )
@@ -171,7 +179,7 @@ def render_model_insights() -> None:
             )
             .style.highlight_max(
                 subset=["Val ROC-AUC", "Val PR-AUC", "Val Recall", "Val F1"],
-                color="#DCFCE7",
+                color="#EAF0E6",
             )
             .format(
                 {
@@ -190,17 +198,13 @@ def render_model_insights() -> None:
     else:
         st.info("Benchmark comparison table not found.")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #E2E8F0; margin: 24px 0;' />", unsafe_allow_html=True)
-
     # Diagnostic Curves & Confusion Matrix
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
-            Holdout Evaluation & Diagnostic Curves
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
+            Holdout evaluation & diagnostic curves
         </div>
-        <p style="color: #5B6577; font-size: 0.85rem; margin-bottom: 12px;">
-            Evaluation curves and confusion matrix at the operational threshold (τ* = 0.23) on the holdout test dataset.
-        </p>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 14px;"></div>
         """,
         unsafe_allow_html=True,
     )
@@ -221,17 +225,13 @@ def render_model_insights() -> None:
         else:
             st.info("ROC & PR curves plot is not available.")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #E2E8F0; margin: 24px 0;' />", unsafe_allow_html=True)
-
     # SHAP Global Explainability Section
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
-            Global Factor Attribution (SHAP Analysis)
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
+            Global factor attribution (SHAP analysis)
         </div>
-        <p style="color: #5B6577; font-size: 0.85rem; margin-bottom: 12px;">
-            Attribution values revealing which customer attributes consistently elevate or reduce predicted churn across the entire customer base.
-        </p>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 14px;"></div>
         """,
         unsafe_allow_html=True,
     )
@@ -252,27 +252,27 @@ def render_model_insights() -> None:
         else:
             st.info("SHAP feature importance bar plot is not available.")
 
-    st.markdown("<hr style='border: none; border-top: 1px solid #E2E8F0; margin: 24px 0;' />", unsafe_allow_html=True)
-
     # Threshold Governance & Methodology Notes
     st.markdown(
-        """
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
-            Decision Threshold & Governance
+        f"""
+        <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
+            Decision threshold & governance
         </div>
+        <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 12px;"></div>
         """,
         unsafe_allow_html=True,
     )
     st.markdown(
-        """
+        f"""
         <div style="
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: {COLOR_PRIMARY_SURFACE};
+            border: 1px solid {COLOR_BORDER};
             border-radius: 8px;
             padding: 16px 20px;
             font-size: 0.86rem;
-            color: #334155;
+            color: {COLOR_PRIMARY_TEXT};
             line-height: 1.6;
+            font-family: {FONT_FAMILY};
         ">
             <b>Decision Threshold Rationale:</b><br/>
             The operational threshold of <b>τ* = 0.23</b> was established through cost-sensitive optimization rather than arbitrary 0.50 cutoff.
@@ -287,3 +287,14 @@ def render_model_insights() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+    with st.expander("Technical Model Specification & Hyperparameters", expanded=False):
+        st.markdown(
+            f"""
+            * **Algorithm:** `{metadata.algorithm}`
+            * **Model Version:** `{metadata.model_version}`
+            * **Optimal Threshold ($\tau^*$):** `{metadata.optimal_threshold:.2f}`
+            * **Evaluation Date:** `{metadata.trained_at}`
+            * **Feature Space:** {len(metadata.feature_names)} engineered features
+            """
+        )

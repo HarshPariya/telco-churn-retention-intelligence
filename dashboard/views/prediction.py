@@ -1,4 +1,7 @@
-"""Customer Churn Prediction view: Individual customer assessment and explainability."""
+"""Customer Churn Prediction view: Individual customer assessment and explainability.
+
+Engineered with a warm light enterprise visual system and non-jargon factor attributions.
+"""
 
 import streamlit as st
 
@@ -6,6 +9,13 @@ from dashboard.components.cards import (
     render_driver_card,
     render_metric_card,
     render_risk_badge,
+)
+from dashboard.components.tokens import (
+    COLOR_BORDER,
+    COLOR_PRIMARY_SURFACE,
+    COLOR_PRIMARY_TEXT,
+    COLOR_SECONDARY_TEXT,
+    FONT_FAMILY,
 )
 from src.telco_churn.inference.predictor import (
     CustomerPredictionRequest,
@@ -15,39 +25,40 @@ from src.telco_churn.inference.predictor import (
 
 def render_customer_prediction() -> None:
     st.markdown(
-        """
+        f"""
         <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 1.65rem; font-weight: 700; color: #172033; margin-bottom: 4px;">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
                 Customer Churn Prediction
             </h1>
-            <p style="color: #5B6577; font-size: 0.95rem; margin-bottom: 14px;">
-                Estimate churn risk for an individual customer and understand the main factors behind the prediction.
+            <p style="color: {COLOR_SECONDARY_TEXT}; font-size: 0.95rem; margin-bottom: 14px; font-family: {FONT_FAMILY};">
+                Estimate churn risk for an individual customer and understand which factors influence the prediction.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Simple 3-Step Workflow Banner
+    # Compact 3-Step Workflow Banner
     st.markdown(
-        """
+        f"""
         <div style="
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
+            background: {COLOR_PRIMARY_SURFACE};
+            border: 1px solid {COLOR_BORDER};
             border-radius: 8px;
-            padding: 12px 18px;
-            margin-bottom: 22px;
+            padding: 10px 16px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 0.84rem;
-            color: #475569;
+            font-size: 0.82rem;
+            color: {COLOR_SECONDARY_TEXT};
+            font-family: {FONT_FAMILY};
         ">
-            <div><b>Step 1:</b> Enter customer details</div>
-            <div style="color: #CBD5E1;">→</div>
-            <div><b>Step 2:</b> Run prediction</div>
-            <div style="color: #CBD5E1;">→</div>
-            <div><b>Step 3:</b> Review risk and contributing factors</div>
+            <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">1.</span> Enter customer details</div>
+            <div style="color: {COLOR_BORDER};">→</div>
+            <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">2.</span> Run prediction</div>
+            <div style="color: {COLOR_BORDER};">→</div>
+            <div><span style="font-weight: 700; color: {COLOR_PRIMARY_TEXT};">3.</span> Review risk and contributing factors</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -66,7 +77,7 @@ def render_customer_prediction() -> None:
     with col_input:
         with st.form("customer_prediction_form"):
             st.markdown(
-                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin-bottom: 8px;'>Customer Profile</div>",
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Customer Profile</div>",
                 unsafe_allow_html=True,
             )
             customer_id = st.text_input(
@@ -88,7 +99,7 @@ def render_customer_prediction() -> None:
                 dependents = st.selectbox("Dependents", options=["No", "Yes"])
 
             st.markdown(
-                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin: 14px 0 8px 0;'>Account & Billing</div>",
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Account & Billing</div>",
                 unsafe_allow_html=True,
             )
             a1, a2 = st.columns(2)
@@ -134,7 +145,7 @@ def render_customer_prediction() -> None:
                 )
 
             st.markdown(
-                "<div style='font-size: 1.0rem; font-weight: 600; color: #172033; margin: 14px 0 8px 0;'>Subscribed Services</div>",
+                f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 8px 0;'>Subscribed Services</div>",
                 unsafe_allow_html=True,
             )
             s1, s2, s3 = st.columns(3)
@@ -156,7 +167,7 @@ def render_customer_prediction() -> None:
 
     with col_result:
         st.markdown(
-            "<div style='font-size: 1.05rem; font-weight: 600; color: #172033; margin-bottom: 8px;'>Model Assessment</div>",
+            f"<div style='font-size: 1.05rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 8px;'>Model Assessment</div>",
             unsafe_allow_html=True,
         )
 
@@ -189,7 +200,7 @@ def render_customer_prediction() -> None:
             st.error("Unable to evaluate this customer profile. Please check the entered values.")
             return
 
-        # Risk Banner
+        # Accessible Soft Risk Banner
         render_risk_badge(res.risk_level, res.churn_probability)
 
         # Supporting Value Metrics
@@ -198,54 +209,56 @@ def render_customer_prediction() -> None:
             render_metric_card(
                 title="Customer Value (CLV)",
                 value=f"${res.clv:,.2f}",
-                subtext="Historical billing spend",
-                color_class="blue",
+                subtext="Monthly Charges × Tenure",
+                color_class="olive",
             )
         with m2:
             render_metric_card(
                 title="Retention Priority",
                 value=f"{res.retention_priority_score:,.1f}",
-                subtext=f"Expected loss: ₹{res.retention_priority_inr:,.0f}",
-                color_class="rose" if res.risk_level in ["CRITICAL", "HIGH"] else "emerald",
+                subtext=f"Expected exposure: ₹{res.retention_priority_inr:,.0f}",
+                color_class="terracotta" if res.risk_level in ["CRITICAL", "HIGH"] else "sage",
             )
 
         # Contributing Factors Section
         st.markdown(
-            "<div style='font-size: 0.96rem; font-weight: 600; color: #172033; margin: 16px 0 4px 0;'>Why this prediction?</div>",
+            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 2px 0;'>Why this prediction?</div>",
             unsafe_allow_html=True,
         )
         st.markdown(
-            "<div style='font-size: 0.82rem; color: #5B6577; margin-bottom: 10px;'>Top factors influencing this customer's predicted risk:</div>",
+            f"<div style='font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 10px;'>Top factors influencing this customer's predicted risk:</div>",
             unsafe_allow_html=True,
         )
 
         for idx, driver in enumerate(res.top_drivers, start=1):
             render_driver_card(driver.feature, driver.direction, driver.impact, idx)
 
-        # Expandable Assessment Methodology
-        with st.expander("Model Assessment & Methodology", expanded=False):
+        # Expandable Methodology & Model Decisions
+        with st.expander("How did the model decide?", expanded=False):
             st.markdown(
                 """
-                **How the Prediction Works:**
-                * The model evaluates customer attributes against historical retention patterns across 7,043 subscriber profiles.
-                * Key factors (such as contract commitment, tenure, and payment methods) increase or decrease the predicted likelihood of churn.
-                * We use **SHAP (Shapley Additive Explanations)** to compute the exact contribution of each factor to this customer's result.
-                * Accounts with probabilities above the operational threshold (**0.23**) are categorized as higher risk to ensure timely review.
+                Each prediction can be explained using feature-level contribution values.
+                These indicate which customer characteristics pushed the model's prediction toward
+                higher or lower churn risk.
+                
+                * **Baseline comparison:** The model evaluates customer attributes against historical retention patterns across 7,043 subscriber profiles.
+                * **Operational threshold:** Accounts with churn probabilities above **0.23** are classified as higher risk to ensure timely review by the retention team.
+                * **Impact direction:** Factors either increase predicted risk (e.g. Month-to-month contracts, short tenure) or provide protective stability (e.g. Multi-year commitments, established tenure).
                 """
             )
 
-        # Suggested Review
+        # Neutral Suggested Review
         st.markdown(
-            "<div style='font-size: 0.96rem; font-weight: 600; color: #172033; margin: 14px 0 4px 0;'>Suggested Review</div>",
+            f"<div style='font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 16px 0 4px 0;'>Suggested Review</div>",
             unsafe_allow_html=True,
         )
         if res.risk_level in ["CRITICAL", "HIGH"]:
             if contract == "Month-to-month":
-                action = "Review eligibility for an annual contract commitment with a standard loyalty incentive."
+                action = "Review contract flexibility and explore annual commitment options before contacting the customer."
             elif internet == "Fiber optic" and support == "No":
-                action = "Verify customer network stability and consider adding technical support assistance."
+                action = "Review broadband service stability and verify if technical assistance could reduce service friction."
             else:
-                action = "Flag account for follow-up review by customer service prior to next renewal cycle."
-            st.info(f"**Recommended Action:** {action}")
+                action = "Flag account for priority review by retention specialists prior to next billing cycle."
+            st.info(f"**Suggested Review:** {action}")
         else:
-            st.success("**Account Stable:** Customer shows healthy retention signals. Continue standard relationship.")
+            st.success("**Suggested Review:** Account signals indicate normal engagement. Continue standard customer care.")
