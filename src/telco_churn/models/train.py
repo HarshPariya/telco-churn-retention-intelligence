@@ -87,7 +87,7 @@ def build_pipeline(
             "n_jobs": -1,
         }
         base_params.update(params)
-        classifier = lgb.LGBMClassifier(**base_params)
+        classifier = lgb.LGBMClassifier(**base_params)  # type: ignore[arg-type]
 
     else:
         raise ValueError(

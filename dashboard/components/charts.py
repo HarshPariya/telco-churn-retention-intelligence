@@ -195,7 +195,10 @@ def plot_priority_scatter(df_results: pd.DataFrame) -> go.Figure:
         },
         margin={"t": 16, "b": 16, "l": 16, "r": 16},
         legend={
-            "title": {"text": "Risk Level", "font": {"color": COLOR_PRIMARY_TEXT, "size": 12, "family": FONT_FAMILY}},
+            "title": {
+                "text": "Risk Level",
+                "font": {"color": COLOR_PRIMARY_TEXT, "size": 12, "family": FONT_FAMILY},
+            },
             "font": {"color": COLOR_SECONDARY_TEXT, "size": 11, "family": FONT_FAMILY},
         },
     )

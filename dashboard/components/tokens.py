@@ -7,27 +7,27 @@ used across the Telco Retention Intelligence platform.
 from typing import Dict
 
 # Neutral & Surface Tokens
-COLOR_PAGE_BG = "#F5F0E7"         # Warm Ivory
+COLOR_PAGE_BG = "#F5F0E7"  # Warm Ivory
 COLOR_PRIMARY_SURFACE = "#FFFDF8"  # Cream / Warm White
-COLOR_SECONDARY_SURFACE = "#F0E9DD" # Warm Sand / Subtle Neutral
-COLOR_BORDER = "#DED4C5"          # Warm Muted Border
-COLOR_BORDER_LIGHT = "#EADBCE"    # Soft Inner Border
+COLOR_SECONDARY_SURFACE = "#F0E9DD"  # Warm Sand / Subtle Neutral
+COLOR_BORDER = "#DED4C5"  # Warm Muted Border
+COLOR_BORDER_LIGHT = "#EADBCE"  # Soft Inner Border
 
 # Typography Tokens
-COLOR_PRIMARY_TEXT = "#2D2924"    # Espresso / Dark Charcoal
+COLOR_PRIMARY_TEXT = "#2D2924"  # Espresso / Dark Charcoal
 COLOR_SECONDARY_TEXT = "#6F675D"  # Muted Warm Charcoal
-COLOR_TERTIARY_TEXT = "#948A7D"   # Disabled / Tertiary Text
+COLOR_TERTIARY_TEXT = "#948A7D"  # Disabled / Tertiary Text
 
 # Brand & Accent Tokens
-COLOR_PRIMARY_BRAND = "#5E6B4A"   # Muted Olive / Sage
-COLOR_PRIMARY_BRAND_DARK = "#465238" # Deep Olive (Hover / Active)
-COLOR_SECONDARY_ACCENT = "#A56B4F" # Restrained Terracotta
+COLOR_PRIMARY_BRAND = "#5E6B4A"  # Muted Olive / Sage
+COLOR_PRIMARY_BRAND_DARK = "#465238"  # Deep Olive (Hover / Active)
+COLOR_SECONDARY_ACCENT = "#A56B4F"  # Restrained Terracotta
 
 # Semantic Risk Tokens
-COLOR_RISK_LOW = "#56735A"        # Sage Green (Low Risk / Healthy)
-COLOR_RISK_MEDIUM = "#B18445"     # Ochre / Amber (Medium Risk)
-COLOR_RISK_HIGH = "#B96745"       # Terracotta (High Risk)
-COLOR_RISK_CRITICAL = "#9F3F3F"   # Muted Deep Red (Critical Risk)
+COLOR_RISK_LOW = "#56735A"  # Sage Green (Low Risk / Healthy)
+COLOR_RISK_MEDIUM = "#B18445"  # Ochre / Amber (Medium Risk)
+COLOR_RISK_HIGH = "#B96745"  # Terracotta (High Risk)
+COLOR_RISK_CRITICAL = "#9F3F3F"  # Muted Deep Red (Critical Risk)
 
 # Risk Badge Styling Specifications
 RISK_BADGE_CONFIG: Dict[str, Dict[str, str]] = {
@@ -62,4 +62,6 @@ RISK_BADGE_CONFIG: Dict[str, Dict[str, str]] = {
 }
 
 # Standard Typography Stack
-FONT_FAMILY = 'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+FONT_FAMILY = (
+    'Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+)

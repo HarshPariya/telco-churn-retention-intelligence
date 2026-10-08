@@ -27,7 +27,7 @@ from dashboard.components.tokens import (
 
 def render_clean_html(html_str: str) -> None:
     """Render HTML safely without markdown code block interpretation.
-    
+
     Strips leading and trailing whitespace from every line to ensure
     Streamlit/CommonMark does not parse 4-space indented HTML tags as <pre><code>.
     """
@@ -99,7 +99,7 @@ def render_risk_badge(
     clv_block = ""
     if clv is not None and priority is not None:
         clv_block = f"""
-        <div style="border-left: 1px solid {style['border']}; padding-left: 18px; margin-left: 18px;">
+        <div style="border-left: 1px solid {style["border"]}; padding-left: 18px; margin-left: 18px;">
             <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600;">Customer Value (CLV)</div>
             <div style="font-size: 1.25rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 2px;">${clv:,.2f}</div>
             <div style="font-size: 0.74rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 1px;">Priority Score: <b>{priority:,.1f}</b></div>
@@ -107,14 +107,14 @@ def render_risk_badge(
         """
 
     html = f"""
-    <div style="background: {style['bg']}; border: 1px solid {style['border']}; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+    <div style="background: {style["bg"]}; border: 1px solid {style["border"]}; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
         <div style="flex: 1; min-width: 200px;">
-            <div style="font-size: 0.80rem; font-weight: 700; color: {style['text']}; letter-spacing: 0.05em;">{style['label']}</div>
-            <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 3px;">{style['desc']}</div>
+            <div style="font-size: 0.80rem; font-weight: 700; color: {style["text"]}; letter-spacing: 0.05em;">{style["label"]}</div>
+            <div style="font-size: 0.84rem; color: {COLOR_SECONDARY_TEXT}; margin-top: 3px;">{style["desc"]}</div>
         </div>
         <div style="display: flex; align-items: center; text-align: right;">
             <div>
-                <div style="font-size: 2.1rem; font-weight: 800; color: {style['text']}; line-height: 1;">{probability:.1%}</div>
+                <div style="font-size: 2.1rem; font-weight: 800; color: {style["text"]}; line-height: 1;">{probability:.1%}</div>
                 <div style="font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; text-transform: uppercase; font-weight: 600; margin-top: 3px;">Estimated Churn Probability</div>
             </div>
             {clv_block}

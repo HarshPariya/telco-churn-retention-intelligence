@@ -101,7 +101,7 @@ class TelcoShapExplainer:
 
     def _transform_input(self, df: pd.DataFrame) -> np.ndarray:
         df_eng = self.feature_engineer.transform(df)
-        return self.preprocessor.transform(df_eng)
+        return np.asarray(self.preprocessor.transform(df_eng))
 
     def explain_instance(self, df_single: pd.DataFrame, top_k: int = 3) -> List[ExplanationDriver]:
         """Explain a single customer prediction and return top-k drivers."""

@@ -68,7 +68,9 @@ def test_dashboard_full_lifecycle():
         if at.exception:
             print(f"FAILED after clicking Load Sample Cohort: {at.exception}")
             sys.exit(1)
-        print(f"SUCCESS: Sample Cohort evaluated and ranked successfully. Found {len(at.dataframe)} dataframes.")
+        print(
+            f"SUCCESS: Sample Cohort evaluated and ranked successfully. Found {len(at.dataframe)} dataframes."
+        )
     else:
         print("WARNING: Could not find 'Load Sample Cohort' button.")
 
@@ -78,7 +80,9 @@ def test_dashboard_full_lifecycle():
     if at.exception:
         print(f"FAILED on Model Insights navigation: {at.exception}")
         sys.exit(1)
-    print(f"SUCCESS: Navigated to Model Insights. Found {len(at.image)} images and {len(at.dataframe)} dataframes.")
+    print(
+        f"SUCCESS: Navigated to Model Insights. Found {len(at.image)} images and {len(at.dataframe)} dataframes."
+    )
 
     # 5. Return to Executive Overview
     print("\n--- 5. Testing Return to Executive Overview ---")

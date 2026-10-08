@@ -151,16 +151,32 @@ def render_customer_prediction() -> None:
             s1, s2, s3 = st.columns(3)
             with s1:
                 phone = st.selectbox("Phone Service", options=["Yes", "No"], index=0)
-                multiple = st.selectbox("Multiple Lines", options=["No", "Yes", "No phone service"], index=0)
-                internet = st.selectbox("Internet Service", options=["Fiber optic", "DSL", "No"], index=0)
+                multiple = st.selectbox(
+                    "Multiple Lines", options=["No", "Yes", "No phone service"], index=0
+                )
+                internet = st.selectbox(
+                    "Internet Service", options=["Fiber optic", "DSL", "No"], index=0
+                )
             with s2:
-                security = st.selectbox("Online Security", options=["No", "Yes", "No internet service"], index=0)
-                backup = st.selectbox("Online Backup", options=["No", "Yes", "No internet service"], index=0)
-                protection = st.selectbox("Device Protection", options=["No", "Yes", "No internet service"], index=0)
+                security = st.selectbox(
+                    "Online Security", options=["No", "Yes", "No internet service"], index=0
+                )
+                backup = st.selectbox(
+                    "Online Backup", options=["No", "Yes", "No internet service"], index=0
+                )
+                protection = st.selectbox(
+                    "Device Protection", options=["No", "Yes", "No internet service"], index=0
+                )
             with s3:
-                support = st.selectbox("Technical Support", options=["No", "Yes", "No internet service"], index=0)
-                tv = st.selectbox("Streaming TV", options=["Yes", "No", "No internet service"], index=0)
-                movies = st.selectbox("Streaming Movies", options=["Yes", "No", "No internet service"], index=0)
+                support = st.selectbox(
+                    "Technical Support", options=["No", "Yes", "No internet service"], index=0
+                )
+                tv = st.selectbox(
+                    "Streaming TV", options=["Yes", "No", "No internet service"], index=0
+                )
+                movies = st.selectbox(
+                    "Streaming Movies", options=["Yes", "No", "No internet service"], index=0
+                )
 
             st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
             st.form_submit_button("Predict Churn Risk", width="stretch")
@@ -261,4 +277,6 @@ def render_customer_prediction() -> None:
                 action = "Flag account for priority review by retention specialists prior to next billing cycle."
             st.info(f"**Suggested Review:** {action}")
         else:
-            st.success("**Suggested Review:** Account signals indicate normal engagement. Continue standard customer care.")
+            st.success(
+                "**Suggested Review:** Account signals indicate normal engagement. Continue standard customer care."
+            )

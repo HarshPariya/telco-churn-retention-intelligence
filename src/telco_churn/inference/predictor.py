@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import List, Optional, Union
 
+import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 
@@ -173,8 +174,8 @@ class TelcoChurnPredictor:
         # Compute CLV and Priority
         tenures = df_clean["tenure"].values
         monthly = df_clean["MonthlyCharges"].values
-        clvs = calculate_clv(monthly, tenures)
-        priorities = calculate_retention_priority(y_probs, clvs)
+        clvs_arr = np.asarray(calculate_clv(monthly, tenures))
+        priorities_arr = np.asarray(calculate_retention_priority(y_probs, clvs_arr))
 
         # SHAP explanations
         if batch_explain:
@@ -190,8 +191,8 @@ class TelcoChurnPredictor:
             prob = float(y_probs[i])
             pred = 1 if prob >= threshold else 0
             risk_tier = assign_risk_tier(prob)
-            clv = float(clvs[i])
-            priority = float(priorities[i])
+            clv = float(clvs_arr[i])
+            priority = float(priorities_arr[i])
 
             if risk_tier in ("CRITICAL", "HIGH"):
                 high_risk_count += 1

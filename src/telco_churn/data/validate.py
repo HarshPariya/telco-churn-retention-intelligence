@@ -1,6 +1,6 @@
 """Data validation and data quality audit for Telco Customer Churn."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,7 @@ EXPECTED_COLUMNS = [
     "Churn",
 ]
 
-VALID_CATEGORIES = {
+VALID_CATEGORIES: Dict[str, Set[Any]] = {
     "gender": {"Male", "Female"},
     "SeniorCitizen": {0, 1},
     "Partner": {"Yes", "No"},
@@ -138,7 +138,7 @@ def validate_raw_data(df: pd.DataFrame, is_inference: bool = False) -> DataQuali
                     actual_unique = {int(x) for x in actual_unique}
                 except Exception:
                     pass
-            invalid_vals = actual_unique - allowed_vals
+            invalid_vals = actual_unique - set(allowed_vals)
             if invalid_vals:
                 issues.append(f"Column '{col}' contains invalid category values: {invalid_vals}")
 

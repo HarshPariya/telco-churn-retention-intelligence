@@ -94,7 +94,9 @@ def render_retention_prioritization() -> None:
             df_to_process = pd.read_csv(uploaded_file)
             required_cols = {"Contract", "tenure", "MonthlyCharges"}
             if not required_cols.issubset(set(df_to_process.columns)):
-                st.error("Uploaded file is missing required customer columns (Contract, tenure, MonthlyCharges).")
+                st.error(
+                    "Uploaded file is missing required customer columns (Contract, tenure, MonthlyCharges)."
+                )
                 return
             st.success(f"Cohort loaded successfully ({len(df_to_process)} customer records).")
         except Exception:
@@ -119,7 +121,11 @@ def render_retention_prioritization() -> None:
         return
 
     # Cohort identification key for session caching
-    cohort_key = f"upload_{uploaded_file.name}_{uploaded_file.size}" if uploaded_file else "sample_cohort_300"
+    cohort_key = (
+        f"upload_{uploaded_file.name}_{uploaded_file.size}"
+        if uploaded_file
+        else "sample_cohort_300"
+    )
 
     # Reset cache if explicitly requested via button
     if load_sample:
@@ -134,20 +140,27 @@ def render_retention_prioritization() -> None:
         results_df = st.session_state["cached_prioritization_df"]
     else:
         # Run Batch Scoring
-        with st.spinner(f"Evaluating {len(df_to_process)} accounts and computing contributing factors..."):
+        with st.spinner(
+            f"Evaluating {len(df_to_process)} accounts and computing contributing factors..."
+        ):
             try:
                 batch_response = predictor.predict_dataframe(df_to_process, batch_explain=True)
             except Exception:
-                st.error("Unable to score this cohort. Please ensure input columns match the standard customer schema.")
+                st.error(
+                    "Unable to score this cohort. Please ensure input columns match the standard customer schema."
+                )
                 return
 
         results_list = []
         for p in batch_response.predictions:
             top_driver_name = p.top_drivers[0].feature if p.top_drivers else "N/A"
-            top_driver_dir = "↑" if (p.top_drivers and p.top_drivers[0].direction == "INCREASES_CHURN") else "↓"
+            top_driver_dir = (
+                "↑" if (p.top_drivers and p.top_drivers[0].direction == "INCREASES_CHURN") else "↓"
+            )
             contract_val = (
                 df_to_process.loc[
-                    df_to_process.get("customerID", df_to_process.index) == p.customer_id, "Contract"
+                    df_to_process.get("customerID", df_to_process.index) == p.customer_id,
+                    "Contract",
                 ].values
                 if "Contract" in df_to_process.columns
                 else ["Unknown"]
@@ -167,22 +180,33 @@ def render_retention_prioritization() -> None:
             )
 
         results_df = pd.DataFrame(results_list)
-        results_df = results_df.sort_values(by="Retention Priority", ascending=False).reset_index(drop=True)
+        results_df = results_df.sort_values(by="Retention Priority", ascending=False).reset_index(
+            drop=True
+        )
         st.session_state["cached_prioritization_df"] = results_df
         st.session_state["cached_cohort_key"] = cohort_key
 
     # Summary KPIs
     total_evaluated = len(results_df)
     high_risk_count = int(results_df["Risk"].isin(["CRITICAL", "HIGH"]).sum())
-    total_at_risk_clv = float(results_df[results_df["Risk"].isin(["CRITICAL", "HIGH"])]["CLV"].sum())
+    total_at_risk_clv = float(
+        results_df[results_df["Risk"].isin(["CRITICAL", "HIGH"])]["CLV"].sum()
+    )
     highest_priority_id = results_df.iloc[0]["Customer ID"] if not results_df.empty else "N/A"
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     k1, k2, k3, k4 = st.columns(4)
     with k1:
-        render_metric_card("Customers Evaluated", f"{total_evaluated:,}", "Cohort volume", color_class="olive")
+        render_metric_card(
+            "Customers Evaluated", f"{total_evaluated:,}", "Cohort volume", color_class="olive"
+        )
     with k2:
-        render_metric_card("Critical / High Risk", f"{high_risk_count:,}", "Requires active review", color_class="terracotta")
+        render_metric_card(
+            "Critical / High Risk",
+            f"{high_risk_count:,}",
+            "Requires active review",
+            color_class="terracotta",
+        )
     with k3:
         render_metric_card(
             "At-Risk Customer Value",

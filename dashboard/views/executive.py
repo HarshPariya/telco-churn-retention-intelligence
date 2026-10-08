@@ -67,7 +67,9 @@ def render_executive_overview() -> None:
     )
 
     test_rows = 1409
-    high_risk_flagged = holdout_metrics.get("true_positives", 351) + holdout_metrics.get("false_positives", 504)
+    high_risk_flagged = holdout_metrics.get("true_positives", 351) + holdout_metrics.get(
+        "false_positives", 504
+    )
     high_risk_pct = high_risk_flagged / max(test_rows, 1)
     estimated_high_risk_count = int(total_customers * high_risk_pct)
     estimated_at_risk_value = total_clv * historical_churn_rate
@@ -248,7 +250,10 @@ def render_executive_overview() -> None:
         """,
         unsafe_allow_html=True,
     )
-    with st.expander("Illustrative Retention Economics: Targeted Retention vs. Blanket Discounts (Scenario Model)", expanded=False):
+    with st.expander(
+        "Illustrative Retention Economics: Targeted Retention vs. Blanket Discounts (Scenario Model)",
+        expanded=False,
+    ):
         st.markdown(
             f"""
             This scenario model illustrates the financial comparison between untargeted blanket discounting and model-targeted outreach:

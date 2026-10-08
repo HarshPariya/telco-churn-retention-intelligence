@@ -42,7 +42,9 @@ def render_model_insights() -> None:
         metrics = metadata.metrics
         ds_info = metadata.dataset_info
     except Exception:
-        st.error("Could not load production model metadata. Please verify that the models/ directory contains valid artifacts.")
+        st.error(
+            "Could not load production model metadata. Please verify that the models/ directory contains valid artifacts."
+        )
         return
 
     # Production Governance & Architecture Summary
@@ -64,7 +66,7 @@ def render_model_insights() -> None:
             <div>
                 <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Production Model</span>
                 <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
-                    {metadata.algorithm.split('(')[0].strip()} <span style="font-size: 0.80rem; font-weight: 500; color: {COLOR_SECONDARY_TEXT};">({metadata.model_version})</span>
+                    {metadata.algorithm.split("(")[0].strip()} <span style="font-size: 0.80rem; font-weight: 500; color: {COLOR_SECONDARY_TEXT};">({metadata.model_version})</span>
                 </div>
             </div>
             <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
@@ -76,13 +78,13 @@ def render_model_insights() -> None:
             <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
                 <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Training Cohort</span>
                 <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
-                    {ds_info.get('train_rows', 4507):,} customers
+                    {ds_info.get("train_rows", 4507):,} customers
                 </div>
             </div>
             <div style="border-left: 1px solid {COLOR_BORDER}; padding-left: 14px;">
                 <span style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Holdout Evaluation</span>
                 <div style="font-size: 0.96rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-top: 1px;">
-                    {ds_info.get('test_rows', 1409):,} customers
+                    {ds_info.get("test_rows", 1409):,} customers
                 </div>
             </div>
         </div>
@@ -106,19 +108,31 @@ def render_model_insights() -> None:
     m1, m2, m3, m4, m5, m6 = st.columns(6)
     with m1:
         render_metric_card(
-            "ROC-AUC", f"{metrics.get('roc_auc', 0.8439):.4f}", "Discriminative ability", color_class="olive"
+            "ROC-AUC",
+            f"{metrics.get('roc_auc', 0.8439):.4f}",
+            "Discriminative ability",
+            color_class="olive",
         )
     with m2:
         render_metric_card(
-            "PR-AUC", f"{metrics.get('pr_auc', 0.6582):.4f}", "Precision-Recall AUC", color_class="olive"
+            "PR-AUC",
+            f"{metrics.get('pr_auc', 0.6582):.4f}",
+            "Precision-Recall AUC",
+            color_class="olive",
         )
     with m3:
         render_metric_card(
-            "Recall", f"{metrics.get('recall', 0.9385):.1%}", "Identified churners", color_class="terracotta"
+            "Recall",
+            f"{metrics.get('recall', 0.9385):.1%}",
+            "Identified churners",
+            color_class="terracotta",
         )
     with m4:
         render_metric_card(
-            "Precision", f"{metrics.get('precision', 0.4105):.1%}", "Flagged precision", color_class="ochre"
+            "Precision",
+            f"{metrics.get('precision', 0.4105):.1%}",
+            "Flagged precision",
+            color_class="ochre",
         )
     with m5:
         render_metric_card(
@@ -126,7 +140,10 @@ def render_model_insights() -> None:
         )
     with m6:
         render_metric_card(
-            "Brier Score", f"{metrics.get('brier_score', 0.1631):.4f}", "Calibration (lower better)", color_class="sage"
+            "Brier Score",
+            f"{metrics.get('brier_score', 0.1631):.4f}",
+            "Calibration (lower better)",
+            color_class="sage",
         )
 
     # Multi-Model Benchmark Comparison Table
@@ -210,12 +227,20 @@ def render_model_insights() -> None:
     )
 
     p1, p2 = st.columns(2)
-    cm_path = PROJECT_ROOT / config.artifacts.figures_dir / "production_xgboost_confusion_matrix.png"
-    curves_path = PROJECT_ROOT / config.artifacts.figures_dir / "production_xgboost_roc_pr_curves.png"
+    cm_path = (
+        PROJECT_ROOT / config.artifacts.figures_dir / "production_xgboost_confusion_matrix.png"
+    )
+    curves_path = (
+        PROJECT_ROOT / config.artifacts.figures_dir / "production_xgboost_roc_pr_curves.png"
+    )
 
     with p1:
         if cm_path.exists():
-            st.image(str(cm_path), caption="Holdout Test Confusion Matrix (Threshold = 0.23)", width="stretch")
+            st.image(
+                str(cm_path),
+                caption="Holdout Test Confusion Matrix (Threshold = 0.23)",
+                width="stretch",
+            )
         else:
             st.info("Confusion matrix plot is not available.")
 
@@ -242,13 +267,21 @@ def render_model_insights() -> None:
 
     with s1:
         if shap_summary_path.exists():
-            st.image(str(shap_summary_path), caption="SHAP Summary (Directional Impact per Customer)", width="stretch")
+            st.image(
+                str(shap_summary_path),
+                caption="SHAP Summary (Directional Impact per Customer)",
+                width="stretch",
+            )
         else:
             st.info("SHAP summary plot is not available.")
 
     with s2:
         if shap_bar_path.exists():
-            st.image(str(shap_bar_path), caption="Top Features Mean Absolute SHAP Impact", width="stretch")
+            st.image(
+                str(shap_bar_path),
+                caption="Top Features Mean Absolute SHAP Impact",
+                width="stretch",
+            )
         else:
             st.info("SHAP feature importance bar plot is not available.")
 
