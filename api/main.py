@@ -9,7 +9,7 @@ import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.dependencies import get_app_config, get_model_predictor
 from api.logging_config import api_logger
@@ -100,6 +100,17 @@ async def generic_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"error": "Internal server error occurred. Please contact technical operations."},
     )
+
+
+@app.get(
+    "/",
+    summary="API Root",
+    tags=["System"],
+    include_in_schema=False,
+)
+def root() -> RedirectResponse:
+    """Redirect root path to interactive Swagger OpenAPI documentation."""
+    return RedirectResponse(url="/docs")
 
 
 @app.get(
