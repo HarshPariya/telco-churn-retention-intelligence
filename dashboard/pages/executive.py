@@ -106,7 +106,7 @@ def render_executive_page() -> None:
             "Month-to-month contracts demonstrate >8x higher churn propensity than 2-year contracts."
         )
         fig_contract = plot_churn_by_contract(df)
-        st.plotly_chart(fig_contract, use_container_width=True)
+        st.plotly_chart(fig_contract, width="stretch")
 
     with col_right:
         st.subheader("Churn Hazard by Tenure Cohort")
@@ -114,4 +114,4 @@ def render_executive_page() -> None:
             "The first 12 months exhibit the steepest drop-off curve (first-year retention cliff)."
         )
         fig_tenure = plot_churn_by_tenure_bucket(df)
-        st.plotly_chart(fig_tenure, use_container_width=True)
+        st.plotly_chart(fig_tenure, width="stretch")

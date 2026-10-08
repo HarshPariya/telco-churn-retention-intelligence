@@ -43,7 +43,7 @@ def render_prioritization_page() -> None:
         )
     with col_sample:
         use_sample = st.button(
-            "📂 Load Pre-Loaded Holdout Cohort (300 Customers)", use_container_width=True
+            "📂 Load Pre-Loaded Holdout Cohort (300 Customers)", width="stretch"
         )
 
     df_to_process = None
@@ -131,7 +131,7 @@ def render_prioritization_page() -> None:
         st.subheader("Risk Tier Distribution")
         risk_counts = results_df["Risk Tier"].value_counts().to_dict()
         fig_donut = plot_risk_distribution(risk_counts)
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width="stretch")
 
     with c_right:
         st.subheader("Retention Priority Matrix")
@@ -147,7 +147,7 @@ def render_prioritization_page() -> None:
             }
         )
         fig_scatter = plot_priority_scatter(scatter_df)
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        st.plotly_chart(fig_scatter, width="stretch")
 
     # Filterable Data Table
     st.subheader("📋 Ranked Retention Call List (Sorted by Priority Score)")
@@ -168,7 +168,7 @@ def render_prioritization_page() -> None:
                 "Priority (₹)": "₹{:,.0f}",
             }
         ),
-        use_container_width=True,
+        width="stretch",
         height=400,
     )
 
@@ -180,5 +180,5 @@ def render_prioritization_page() -> None:
         data=csv_buffer.getvalue(),
         file_name="telco_retention_prioritized_cohort.csv",
         mime="text/csv",
-        use_container_width=True,
+        width="stretch",
     )

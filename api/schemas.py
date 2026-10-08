@@ -11,6 +11,18 @@ from src.telco_churn.inference.predictor import (
     CustomerPredictionResponse,
 )
 
+__all__ = [
+    "BatchCustomerRequest",
+    "BatchPredictionResponse",
+    "CustomerDriver",
+    "CustomerPredictionRequest",
+    "CustomerPredictionResponse",
+    "ErrorDetail",
+    "ErrorResponse",
+    "HealthResponse",
+    "MetadataResponse",
+]
+
 
 class HealthResponse(BaseModel):
     status: str = "healthy"

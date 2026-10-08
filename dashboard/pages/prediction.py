@@ -118,7 +118,7 @@ def render_prediction_page() -> None:
                 )
 
             st.form_submit_button(
-                "⚡ Evaluate Churn Risk & Explain", use_container_width=True
+                "⚡ Evaluate Churn Risk & Explain", width="stretch"
             )
 
     with col_result:

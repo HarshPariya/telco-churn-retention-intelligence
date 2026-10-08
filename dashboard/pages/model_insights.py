@@ -165,7 +165,7 @@ def render_model_insights_page() -> None:
                     "val_f1": "{:.4f}",
                 }
             ),
-            use_container_width=True,
+            width="stretch",
         )
     else:
         st.info("Benchmark comparison table not found.")
