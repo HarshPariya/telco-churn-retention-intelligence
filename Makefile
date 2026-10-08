@@ -17,7 +17,7 @@ help:
 	@echo "  make clean         Remove build artifacts, caches, and temp files"
 
 install:
-	uv pip install -r requirements.txt
+	pip install -r requirements-dev.txt
 
 data:
 	python scripts/download_data.py
