@@ -17,6 +17,7 @@ from dashboard.components.tokens import (
     COLOR_PRIMARY_TEXT,
     COLOR_SECONDARY_TEXT,
     FONT_FAMILY,
+    render_clean_html,
 )
 from src.telco_churn.config import PROJECT_ROOT, load_config
 from src.telco_churn.inference.predictor import get_predictor
@@ -25,7 +26,7 @@ from src.telco_churn.inference.predictor import get_predictor
 def render_retention_prioritization() -> None:
     config = load_config()
 
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="margin-bottom: 20px;">
             <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
@@ -35,12 +36,11 @@ def render_retention_prioritization() -> None:
                 Rank customers by predicted churn risk and customer value so retention teams can focus their effort where it matters most.
             </p>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     # Restrained Methodology Card
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="
             background: {COLOR_PRIMARY_SURFACE};
@@ -63,8 +63,7 @@ def render_retention_prioritization() -> None:
                 <b>CLV Definition:</b> Monthly Charges × Tenure
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     try:
@@ -84,7 +83,7 @@ def render_retention_prioritization() -> None:
             help="Supported format: CSV with standard customer demographic, account, and service attributes.",
         )
     with col_sample:
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
+        render_clean_html("<div style='height: 28px;'></div>")
         load_sample = st.button("Load Sample Cohort (300 Customers)", width="stretch")
 
     df_to_process = None
@@ -98,52 +97,64 @@ def render_retention_prioritization() -> None:
                 return
             st.success(f"Cohort loaded successfully ({len(df_to_process)} customer records).")
         except Exception:
-            st.error("Unable to process the uploaded CSV file. Please verify file format.")
+            st.error("Error reading uploaded CSV. Please check formatting.")
             return
-    elif load_sample or "sample_cohort_loaded" in st.session_state:
-        st.session_state["sample_cohort_loaded"] = True
-        test_path = PROJECT_ROOT / config.data.test_path
-        if test_path.exists():
-            df_test = pd.read_parquet(test_path)
-            df_to_process = df_test.head(300).copy()
+    elif load_sample:
+        # Load from raw data sample
+        raw_path = PROJECT_ROOT / config.data.raw_path
+        if raw_path.exists():
+            full_df = pd.read_csv(raw_path)
+            df_to_process = full_df.sample(n=min(300, len(full_df)), random_state=42).copy()
+            st.session_state["cohort_df"] = df_to_process
         else:
-            df_raw = pd.read_csv(PROJECT_ROOT / config.data.raw_path)
-            df_to_process = df_raw.head(300).copy()
+            st.error("Raw reference dataset is not available.")
+            return
+    elif "cohort_df" in st.session_state:
+        df_to_process = st.session_state["cohort_df"]
 
-    # Empty State if no cohort loaded
     if df_to_process is None:
         render_empty_state(
-            message="No customer cohort has been loaded yet.",
-            subtext="Upload a CSV file or click 'Load Sample Cohort' to begin prioritization.",
+            title="No cohort loaded",
+            description="Upload a customer CSV or click 'Load Sample Cohort' to generate prioritized retention actions.",
         )
         return
 
-    # Run Batch Scoring
-    with st.spinner(f"Evaluating {len(df_to_process)} accounts and computing contributing factors..."):
+    # Process and rank cohort
+    with st.spinner("Calculating churn risk probabilities and retention priority..."):
         try:
-            batch_response = predictor.predict_dataframe(df_to_process, batch_explain=True)
-        except Exception:
-            st.error("Unable to score this cohort. Please ensure input columns match the standard customer schema.")
+            records = df_to_process.to_dict(orient="records")
+            # Predict in batch
+            batch_result = predictor.predict_batch(records)
+            predictions = batch_result.predictions
+        except Exception as e:
+            st.error(f"Inference processing failed: {str(e)}")
             return
 
     results_list = []
-    for p in batch_response.predictions:
-        top_driver_name = p.top_drivers[0].feature if p.top_drivers else "N/A"
-        top_driver_dir = "↑" if (p.top_drivers and p.top_drivers[0].direction == "INCREASES_CHURN") else "↓"
-        contract_val = df_to_process.loc[
-            df_to_process.get("customerID", df_to_process.index) == p.customer_id, "Contract"
-        ].values if "Contract" in df_to_process.columns else ["Unknown"]
-        contract_str = str(contract_val[0]) if len(contract_val) > 0 else "Month-to-month"
+    for row, pred in zip(records, predictions, strict=False):
+        cust_id = row.get("customerID", row.get("CustomerID", f"CUST-{pred.customer_id}"))
+        tenure_val = float(row.get("tenure", 1))
+        monthly_val = float(row.get("MonthlyCharges", 0.0))
+        clv = tenure_val * monthly_val
+
+        # Priority calculation: Risk Probability * Customer Value
+        priority_score = pred.churn_probability * clv
+
+        top_driver = "Tenure"
+        if pred.top_factors:
+            top_driver = pred.top_factors[0].feature_name.replace("_", " ").title()
 
         results_list.append(
             {
-                "Customer ID": p.customer_id,
-                "Churn Probability": p.churn_probability,
-                "Risk": p.risk_level,
-                "Contract": contract_str,
-                "CLV": p.clv,
-                "Retention Priority": p.retention_priority_score,
-                "Top Driver": f"{top_driver_name} {top_driver_dir}",
+                "Customer ID": cust_id,
+                "Churn Probability": pred.churn_probability,
+                "Risk": pred.risk_tier,
+                "Contract": row.get("Contract", "Month-to-month"),
+                "Monthly Charges": monthly_val,
+                "Tenure (Mo)": int(tenure_val),
+                "CLV": clv,
+                "Retention Priority": priority_score,
+                "Top Driver": top_driver,
             }
         )
 
@@ -156,7 +167,7 @@ def render_retention_prioritization() -> None:
     total_at_risk_clv = float(results_df[results_df["Risk"].isin(["CRITICAL", "HIGH"])]["CLV"].sum())
     highest_priority_id = results_df.iloc[0]["Customer ID"] if not results_df.empty else "N/A"
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    render_clean_html("<div style='height: 8px;'></div>")
     k1, k2, k3, k4 = st.columns(4)
     with k1:
         render_metric_card("Customers Evaluated", f"{total_evaluated:,}", "Cohort volume", color_class="olive")
@@ -178,19 +189,18 @@ def render_retention_prioritization() -> None:
         )
 
     # Charts Grid
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 24px 0 4px 0; font-family: {FONT_FAMILY};">
             Cohort breakdown & priority matrix
         </div>
         <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 16px;"></div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     c_left, c_right = st.columns([1, 1.4])
     with c_left:
-        st.markdown(
+        render_clean_html(
             f"""
             <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 2px;">
                 Cohort Risk Distribution
@@ -198,15 +208,14 @@ def render_retention_prioritization() -> None:
             <div style="font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 8px;">
                 Breakdown of accounts across calibrated risk levels.
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         risk_counts = results_df["Risk"].value_counts().to_dict()
         fig_donut = plot_risk_distribution(risk_counts)
         st.plotly_chart(fig_donut, width="stretch", config={"displayModeBar": False})
 
     with c_right:
-        st.markdown(
+        render_clean_html(
             f"""
             <div style="font-size: 0.96rem; font-weight: 600; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 2px;">
                 Retention Priority Matrix
@@ -214,8 +223,7 @@ def render_retention_prioritization() -> None:
             <div style="font-size: 0.80rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 8px;">
                 Bubble size reflects overall Retention Priority (Probability × CLV).
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         scatter_df = results_df.rename(
             columns={
@@ -230,14 +238,13 @@ def render_retention_prioritization() -> None:
         st.plotly_chart(fig_scatter, width="stretch", config={"displayModeBar": False})
 
     # Filterable Queue Table
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
             Ranked retention queue
         </div>
         <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 12px;"></div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     f1, f2, f3, f4 = st.columns(4)

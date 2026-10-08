@@ -4,6 +4,8 @@ Provides rigorous evaluation metrics, model benchmarking, global SHAP feature at
 and operational decision threshold governance in a warm light enterprise visual system.
 """
 
+import textwrap
+
 import pandas as pd
 import streamlit as st
 
@@ -15,6 +17,7 @@ from dashboard.components.tokens import (
     COLOR_PRIMARY_TEXT,
     COLOR_SECONDARY_TEXT,
     FONT_FAMILY,
+    render_clean_html,
 )
 from src.telco_churn.config import PROJECT_ROOT, load_config
 from src.telco_churn.models.registry import load_production_artifact
@@ -23,7 +26,7 @@ from src.telco_churn.models.registry import load_production_artifact
 def render_model_insights() -> None:
     config = load_config()
 
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="margin-bottom: 20px;">
             <h1 style="font-size: 1.75rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin-bottom: 4px; font-family: {FONT_FAMILY};">
@@ -33,8 +36,7 @@ def render_model_insights() -> None:
                 Review how well the model performs, how it compares with alternatives, and which factors most influence predictions.
             </p>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     try:
@@ -46,7 +48,7 @@ def render_model_insights() -> None:
         return
 
     # Production Governance & Architecture Summary
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="
             background: {COLOR_PRIMARY_SURFACE};
@@ -86,12 +88,11 @@ def render_model_insights() -> None:
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     # Core Metrics Row (Measured on Unseen Holdout Test Set)
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 24px 0 4px 0; font-family: {FONT_FAMILY};">
             Holdout performance metrics
@@ -99,8 +100,7 @@ def render_model_insights() -> None:
         <div style="font-size: 0.82rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 12px;">
             Measured on a strictly segregated 20% holdout test dataset (1,409 accounts) never seen during training or tuning.
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     m1, m2, m3, m4, m5, m6 = st.columns(6)
@@ -130,7 +130,7 @@ def render_model_insights() -> None:
         )
 
     # Multi-Model Benchmark Comparison Table
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
             Model benchmark comparison
@@ -139,8 +139,7 @@ def render_model_insights() -> None:
         <div style="font-size: 0.82rem; color: {COLOR_SECONDARY_TEXT}; margin-bottom: 12px;">
             5-fold stratified cross-validation on training cohort alongside final holdout test results:
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     benchmark_csv = PROJECT_ROOT / config.artifacts.tables_dir / "model_benchmark_comparison.csv"
@@ -199,14 +198,13 @@ def render_model_insights() -> None:
         st.info("Benchmark comparison table not found.")
 
     # Diagnostic Curves & Confusion Matrix
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
             Holdout evaluation & diagnostic curves
         </div>
         <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 14px;"></div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     p1, p2 = st.columns(2)
@@ -226,14 +224,13 @@ def render_model_insights() -> None:
             st.info("ROC & PR curves plot is not available.")
 
     # SHAP Global Explainability Section
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
             Global factor attribution (SHAP analysis)
         </div>
         <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 14px;"></div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     s1, s2 = st.columns(2)
@@ -253,16 +250,15 @@ def render_model_insights() -> None:
             st.info("SHAP feature importance bar plot is not available.")
 
     # Threshold Governance & Methodology Notes
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="font-size: 1.15rem; font-weight: 700; color: {COLOR_PRIMARY_TEXT}; margin: 28px 0 4px 0; font-family: {FONT_FAMILY};">
             Decision threshold & governance
         </div>
         <div style="height: 1px; background-color: {COLOR_BORDER}; margin-bottom: 12px;"></div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
-    st.markdown(
+    render_clean_html(
         f"""
         <div style="
             background: {COLOR_PRIMARY_SURFACE};
@@ -275,7 +271,7 @@ def render_model_insights() -> None:
             font-family: {FONT_FAMILY};
         ">
             <b>Decision Threshold Rationale:</b><br/>
-            The operational threshold of <b>τ* = 0.23</b> was established through cost-sensitive optimization rather than arbitrary 0.50 cutoff.
+            The operational threshold of <b>τ* = {metadata.optimal_threshold:.2f}</b> was established through cost-sensitive optimization rather than arbitrary 0.50 cutoff.
             Because losing a subscriber entails high customer acquisition and lifetime value replacement costs, the platform prioritizes
             <b>identifying true churners (93.8% recall)</b>. Retention managers can adjust contact strategies based on customer priority tiers
             rather than treating all flagged accounts identically.
@@ -284,17 +280,18 @@ def render_model_insights() -> None:
             All predictions are generated deterministically using the production XGBoost classifier and explainable feature representations.
             No automated interventions occur without human review by the retention team.
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     with st.expander("Technical Model Specification & Hyperparameters", expanded=False):
         st.markdown(
-            f"""
-            * **Algorithm:** `{metadata.algorithm}`
-            * **Model Version:** `{metadata.model_version}`
-            * **Optimal Threshold ($\tau^*$):** `{metadata.optimal_threshold:.2f}`
-            * **Evaluation Date:** `{metadata.trained_at}`
-            * **Feature Space:** {len(metadata.feature_names)} engineered features
-            """
+            textwrap.dedent(
+                f"""
+                * **Algorithm:** `{metadata.algorithm}`
+                * **Model Version:** `{metadata.model_version}`
+                * **Optimal Threshold ($\tau^*$):** `{metadata.optimal_threshold:.2f}`
+                * **Evaluation Date:** `{metadata.trained_at}`
+                * **Feature Space:** {len(metadata.feature_names)} engineered features
+                """
+            ).strip()
         )

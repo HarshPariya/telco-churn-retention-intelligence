@@ -25,6 +25,7 @@ from dashboard.components.tokens import (
     COLOR_SECONDARY_SURFACE,
     COLOR_SECONDARY_TEXT,
     FONT_FAMILY,
+    render_clean_html,
 )
 from dashboard.views.executive import render_executive_overview
 from dashboard.views.model_insights import render_model_insights
@@ -62,28 +63,91 @@ CUSTOM_CSS = f"""
         padding-top: 1.5rem;
     }}
 
-    /* Primary Action Buttons (Muted Olive) */
-    .stButton > button {{
+    /* Primary Action Buttons (Muted Olive Green) */
+    button,
+    button[kind="secondary"],
+    button[kind="primary"],
+    .stButton > button,
+    .stButton button,
+    .stDownloadButton > button,
+    .stDownloadButton button,
+    .stFormSubmitButton > button,
+    .stFormSubmitButton button,
+    button[data-testid*="stBaseButton"],
+    button[data-testid*="baseButton"] {{
         background-color: {COLOR_PRIMARY_BRAND} !important;
-        color: #FFFDF8 !important;
-        font-weight: 600 !important;
-        font-size: 0.88rem !important;
         border: 1px solid {COLOR_PRIMARY_BRAND_DARK} !important;
         border-radius: 8px !important;
-        padding: 0.5rem 1.25rem !important;
+        padding: 0.55rem 1.35rem !important;
         transition: all 0.15s ease-in-out !important;
         box-shadow: 0 1px 3px rgba(45, 41, 36, 0.08) !important;
+        cursor: pointer !important;
     }}
-    .stButton > button:hover {{
+
+    /* High-contrast crisp warm white text inside ALL buttons */
+    button,
+    button *,
+    button p,
+    button span,
+    button div,
+    .stButton button,
+    .stButton button *,
+    .stButton button p,
+    .stButton button span,
+    .stButton button div,
+    .stDownloadButton button,
+    .stDownloadButton button *,
+    .stDownloadButton button p,
+    .stDownloadButton button span,
+    .stFormSubmitButton button,
+    .stFormSubmitButton button *,
+    .stFormSubmitButton button p,
+    .stFormSubmitButton button span,
+    button[data-testid*="stBaseButton"],
+    button[data-testid*="stBaseButton"] *,
+    button[data-testid*="stBaseButton"] p,
+    button[data-testid*="stBaseButton"] span,
+    button[data-testid*="baseButton"],
+    button[data-testid*="baseButton"] *,
+    button[data-testid*="baseButton"] p,
+    button[data-testid*="baseButton"] span {{
+        color: #FFFDF8 !important;
+        font-weight: 600 !important;
+        font-size: 0.90rem !important;
+        font-family: {FONT_FAMILY} !important;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.20) !important;
+        -webkit-font-smoothing: antialiased !important;
+    }}
+
+    button:hover,
+    button:hover *,
+    button:hover p,
+    button:hover span,
+    .stButton button:hover,
+    .stButton button:hover *,
+    .stButton button:hover p,
+    .stButton button:hover span,
+    .stDownloadButton button:hover,
+    .stDownloadButton button:hover *,
+    .stDownloadButton button:hover p,
+    .stDownloadButton button:hover span,
+    .stFormSubmitButton button:hover,
+    .stFormSubmitButton button:hover *,
+    .stFormSubmitButton button:hover p,
+    .stFormSubmitButton button:hover span,
+    button[data-testid*="stBaseButton"]:hover,
+    button[data-testid*="stBaseButton"]:hover *,
+    button[data-testid*="stBaseButton"]:hover p,
+    button[data-testid*="stBaseButton"]:hover span,
+    button[data-testid*="baseButton"]:hover,
+    button[data-testid*="baseButton"]:hover *,
+    button[data-testid*="baseButton"]:hover p,
+    button[data-testid*="baseButton"]:hover span {{
         background-color: {COLOR_PRIMARY_BRAND_DARK} !important;
         border-color: #38422C !important;
         color: #FFFDF8 !important;
         transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(45, 41, 36, 0.12) !important;
-    }}
-    .stButton > button:active {{
-        background-color: #38422C !important;
-        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(45, 41, 36, 0.14) !important;
     }}
 
     /* Warm Inputs and Selects */
@@ -128,14 +192,18 @@ CUSTOM_CSS = f"""
         color: {COLOR_PRIMARY_TEXT};
     }}
 
-    /* Typography */
+    /* Typography (Scoped so buttons are never overridden by dark text) */
     h1, h2, h3, h4 {{
         color: {COLOR_PRIMARY_TEXT} !important;
         font-weight: 700;
         letter-spacing: -0.01em;
     }}
-    p, span, label {{
+    p:not(button *), span:not(button *) {{
         color: {COLOR_PRIMARY_TEXT};
+    }}
+    label {{
+        color: {COLOR_PRIMARY_TEXT} !important;
+        font-weight: 600 !important;
     }}
 </style>
 """
@@ -147,26 +215,23 @@ def main() -> None:
 
     # Sidebar Enterprise Brand Header
     with st.sidebar:
-        st.markdown(
-            f"""
-            <div style="margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="background-color: {COLOR_PRIMARY_BRAND}; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #FFFDF8; font-weight: 800; font-size: 14px; letter-spacing: -0.02em;">
-                        TC
-                    </div>
-                    <div>
-                        <div style="font-size: 1.05rem; font-weight: 800; color: {COLOR_PRIMARY_TEXT}; letter-spacing: -0.01em; line-height: 1.2;">TELCO CHURN</div>
-                        <div style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Retention Intelligence</div>
-                    </div>
+        brand_html = f"""
+        <div style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background-color: {COLOR_PRIMARY_BRAND}; border-radius: 6px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #FFFDF8; font-weight: 800; font-size: 14px; letter-spacing: -0.02em;">
+                    TC
+                </div>
+                <div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: {COLOR_PRIMARY_TEXT}; letter-spacing: -0.01em; line-height: 1.2;">TELCO CHURN</div>
+                    <div style="font-size: 0.70rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Retention Intelligence</div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        </div>
+        """
+        render_clean_html(brand_html)
 
-        st.markdown(
-            f"<div style='font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;'>NAVIGATION</div>",
-            unsafe_allow_html=True,
+        render_clean_html(
+            f"<div style='font-size: 0.72rem; color: {COLOR_SECONDARY_TEXT}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;'>NAVIGATION</div>"
         )
 
         nav_options = [
@@ -192,9 +257,8 @@ def main() -> None:
             label_visibility="collapsed",
         )
 
-        st.markdown(
-            f"<div style='height: 1px; background-color: {COLOR_BORDER}; margin: 20px 0;'></div>",
-            unsafe_allow_html=True,
+        render_clean_html(
+            f"<div style='height: 1px; background-color: {COLOR_BORDER}; margin: 20px 0;'></div>"
         )
 
         # Verified Model Status Section
