@@ -299,6 +299,8 @@ During the release readiness engineering cycle, several subtle technical issues 
 | **BUG-03** | `scripts/build_notebooks.py` | Automated notebook execution via `nbclient` | `nbclient` executes relative to workspace root rather than `notebooks/` directory | Dynamically resolved `PROJECT_ROOT` across all 6 notebooks | All 6 notebooks executed and saved with real outputs |
 | **BUG-04** | `api/schemas.py` | Integration test imports | `BatchPredictionResponse` exported from predictor but omitted from `api/schemas.py` | Added re-export in `api/schemas.py` | Test suite passed 18/18 with zero collection errors |
 | **BUG-05** | `api/main.py` & `dashboard/charts.py` | Linter execution | `ruff` identified ambiguous variable name `l` and chained exception formatting | Refactored variable names and added `from e` chaining | `ruff check .` output: `All checks passed!` |
+| **BUG-06** | `dashboard/pages/` directory | UI routing inspection | Streamlit multi-page auto-scanner conflicted with custom navigation; direct visits to `/executive`, `/prediction` rendered blank | Removed `dashboard/pages/`, refactored views into `dashboard/views/`, unified routing in `dashboard/app.py` | Verified with Streamlit `AppTest` executing all 4 views with zero exceptions |
+| **BUG-07** | `dashboard/views/model_insights.py` | Runtime deprecation audit | `st.image(..., use_column_width=True)` triggered deprecation warnings in Streamlit 1.40+ | Replaced all occurrences with modern `width="stretch"` | Zero deprecation warnings in console or UI |
 
 ---
 
